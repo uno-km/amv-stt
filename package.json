@@ -72,7 +72,7 @@
     "voice-assistant"
   ],
   "author": "uno-km (AMEVA Foundation) <dev@ameva.org>",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/uno-km/termux-stt/issues"
   },

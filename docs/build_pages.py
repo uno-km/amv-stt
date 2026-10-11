@@ -140,7 +140,7 @@ def get_footer():
         <div style="margin-bottom: 8px; font-size: 0.85em; opacity: 0.85;">
             <strong>Disclaimer:</strong> termux-stt is an independent open-source project developed for the Android Termux environment and is not officially affiliated with, endorsed by, or sponsored by the Termux project, OpenAI, or any other third party.
         </div>
-        <span data-i18n="common.footerText">&copy; 2026 termux-stt Project (uno-km). Released under the MIT License.</span>
+        <span data-i18n="common.footerText">&copy; 2026 termux-stt Project (uno-km). Released under the Apache License 2.0.</span>
     </footer>"""
 
 def build_index():
@@ -166,7 +166,7 @@ def build_index():
                 <img src="https://img.shields.io/badge/Node.js-16%20%7C%2018%20%7C%2020%20%7C%2022-339933?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node Version">
                 <img src="https://img.shields.io/badge/Platform-Android%20Termux%20(ARM64)-00887A?style=flat-square&logo=android&logoColor=white" alt="Platform">
                 <img src="https://img.shields.io/badge/Tests-26%20passed%20%7C%20100%25-success?style=flat-square" alt="Tests">
-                <img src="https://img.shields.io/badge/License-MIT-green.svg?style=flat-square" alt="License">
+                <img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=flat-square" alt="License">
             </div>
 
             <div class="alert alert-info" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
