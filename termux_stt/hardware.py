@@ -150,6 +150,46 @@ def detect_hardware() -> HardwareProfile:
     )
 
 
+GPU_RUNTIME_MIN_VERSION = "2.0.0"
+
+
+def _require_gpu_runtime(requested_device: str) -> None:
+    """Stop with the shared AMU_ERR_RUNTIME_REQUIRED explanation unless ameva-runtime is usable.
+
+    Every explicit GPU request goes through here. There is no CPU fallback: the caller gets
+    RuntimeRequiredError and the CLI exits with status 69.
+    """
+    from termux_stt.exceptions import RuntimeRequiredError
+    try:
+        from ameva_device import AmevaRuntimeRequiredError, require_ameva_runtime
+    except ImportError as exc:
+        raise RuntimeRequiredError(
+            "[AMU_ERR_RUNTIME_REQUIRED] termux-stt: GPU execution (device='%s') needs ameva-runtime (AMUDA), "
+            "and the shared check library 'ameva-device-sdk' is missing from this installation.\n"
+            "Nothing was run, and no CPU fallback was used.\n"
+            "Install:\n"
+            "  pip install \"ameva-runtime>=%s\"\n"
+            "  npm install -g @ameva/runtime\n"
+            "  Releases and documentation: https://github.com/uno-km/ameva-runtime-releases\n"
+            "To run on the CPU instead, use --device cpu.\n" % (requested_device, GPU_RUNTIME_MIN_VERSION)
+        ) from exc
+    try:
+        require_ameva_runtime(
+            "termux-stt", "GPU execution (device='%s')" % requested_device,
+            min_version=GPU_RUNTIME_MIN_VERSION,
+        )
+    except AmevaRuntimeRequiredError as exc:
+        raise RuntimeRequiredError(str(exc)) from exc
+
+
+def _note_cpu_instead(reason: str) -> None:
+    """auto mode: say on stderr that the GPU was not used, so the CPU run is never silent."""
+    import sys
+    sys.stderr.write("[termux-stt] GPU not used: %s. This run uses the CPU. "
+                     "To enable the GPU: pip install ameva-runtime (https://github.com/uno-km/ameva-runtime-releases)\n" % reason)
+    sys.stderr.flush()
+
+
 def resolve_device(requested_device: str = "auto") -> Tuple[str, int]:
     from termux_stt.exceptions import PlatformNotSupportedError, ErrorCode
 
@@ -160,18 +200,9 @@ def resolve_device(requested_device: str = "auto") -> Tuple[str, int]:
         return "cpu", optimal_threads
 
     if req in ("vulkan", "gpu"):
-        try:
-            from ameva_runtime import vulkan as avr
-        except ImportError:
-            raise PlatformNotSupportedError(
-                "[ERROR: AMEVA-STT-E001] GPU acceleration requires 'ameva-runtime'.\n"
-                "Cause: Hardware abstraction provider 'ameva-runtime' is not installed.\n"
-                "Action Required: Install the hardware acceleration package via:\n"
-                "  - Python: pip install ameva-runtime\n"
-                "  - Node.js: npm install @unokm/ameva-runtime\n"
-                "Documentation: https://github.com/uno-km/termux-stt",
-                code=ErrorCode.RUNTIME_NOT_INSTALLED,
-            )
+        # Every explicit GPU request needs ameva-runtime (AMUDA); no CPU fallback.
+        _require_gpu_runtime(req)
+        from ameva_runtime import vulkan as avr
 
         try:
             if hasattr(avr, "get_or_create_context"):
@@ -210,8 +241,13 @@ def resolve_device(requested_device: str = "auto") -> Tuple[str, int]:
                 ctx = avr.VulkanContext("auto")
             if ctx.backend_type == "vulkan" or getattr(ctx, "is_gpu", False):
                 return "vulkan", 32
-        except Exception:
-            pass
+        except ImportError:
+            _note_cpu_instead("ameva-runtime (AMUDA) is not installed")
+            return "cpu", optimal_threads
+        except Exception as auto_err:
+            _note_cpu_instead("GPU initialisation failed (%s)" % auto_err)
+            return "cpu", optimal_threads
+        _note_cpu_instead("ameva-runtime reported no GPU backend")
         return "cpu", optimal_threads
 
     raise ValueError(f"Unsupported device '{requested_device}'. Must be one of ['auto', 'gpu', 'vulkan', 'cpu'].")

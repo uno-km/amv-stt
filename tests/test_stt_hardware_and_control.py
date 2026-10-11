@@ -35,8 +35,8 @@ class TestSttHardwareAndControl(unittest.TestCase):
             with self.assertRaises(PlatformNotSupportedError) as ctx:
                 resolve_device("gpu")
             self.assertEqual(ctx.exception.code, ErrorCode.RUNTIME_NOT_INSTALLED)
-            self.assertIn("[ERROR: AMEVA-STT-E001]", str(ctx.exception))
-            self.assertIn("pip install ameva-runtime", str(ctx.exception))
+            self.assertIn("AMU_ERR_RUNTIME_REQUIRED", str(ctx.exception))
+            self.assertIn("pip install", str(ctx.exception))
 
     def test_resolve_device_gpu_fail_fast_when_vulkan_fails(self):
         mock_avr = MagicMock()
@@ -50,7 +50,8 @@ class TestSttHardwareAndControl(unittest.TestCase):
         mock_parent = MagicMock()
         mock_parent.vulkan = mock_avr
 
-        with patch.dict("sys.modules", {"ameva_runtime": mock_parent, "ameva_runtime.vulkan": mock_avr}):
+        with patch.dict("sys.modules", {"ameva_runtime": mock_parent, "ameva_runtime.vulkan": mock_avr}), \
+                patch("ameva_device.runtime_guard.installed_runtime_version", return_value="2.8.1"):
             with self.assertRaises(PlatformNotSupportedError) as ctx:
                 resolve_device("vulkan")
             self.assertEqual(ctx.exception.code, ErrorCode.VULKAN_DEVICE)

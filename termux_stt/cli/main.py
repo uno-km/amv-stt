@@ -12,6 +12,7 @@ from termux_stt.cli.models_cmd import run_models
 from termux_stt.cli.transcribe import run_transcribe
 from termux_stt.platform.installer import main as run_install
 from termux_stt.web import run_web_app
+from termux_stt.exceptions import RuntimeRequiredError
 
 
 def _run_cli():
@@ -163,6 +164,21 @@ def _run_cli():
 
 
 def main():
+    """CLI entry point.
+
+    A GPU request without a usable ameva-runtime ends here with the shared explanation on stderr
+    and exit status 69, whichever sub-command raised it.
+    """
+    from termux_stt.exceptions import RuntimeRequiredError
+    try:
+        return _main_impl()
+    except RuntimeRequiredError as err:
+        sys.stderr.write(str(err))
+        sys.stderr.flush()
+        return 69
+
+
+def _main_impl():
     try:
         _run_cli()
     except FileNotFoundError as e:
@@ -181,6 +197,8 @@ def main():
     except KeyboardInterrupt:
         print("\n[!] Operation cancelled by user.")
         sys.exit(0)
+    except RuntimeRequiredError:
+        raise
     except Exception as e:
         from termux_stt.exceptions import TermuxSTTError
         if isinstance(e, TermuxSTTError):

@@ -7,6 +7,7 @@ System doctor and environment diagnostic command.
 import platform
 import shutil
 import sys
+from termux_stt.exceptions import RuntimeRequiredError
 
 
 def _status_tag(status: str) -> str:
@@ -69,6 +70,8 @@ def run_doctor(args):
             print(f"{_status_tag('ok')} neural diarization models (PyAnnote 3.0 + CAM++) installed")
         else:
             print(f"{_status_tag('warn')} neural diarization models missing (Install via: termux-stt install --engine diarization)")
+    except RuntimeRequiredError:
+        raise
     except Exception:
         pass
 

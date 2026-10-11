@@ -46,6 +46,16 @@ class ExitCode:
 class PlatformNotSupportedError(AmevaTermuxError):
     DEFAULT_CODE = ErrorCode.PLATFORM_NOT_SUPPORTED
 
+class RuntimeRequiredError(PlatformNotSupportedError):
+    """A GPU request needs ameva-runtime (AMUDA), which is missing or too old.
+
+    The message is the shared AMU_ERR_RUNTIME_REQUIRED explanation. The CLI exits with status 69;
+    nothing is run and there is no CPU fallback.
+    """
+
+    DEFAULT_CODE = ErrorCode.RUNTIME_NOT_INSTALLED
+    runtime_required = True
+
 
 class ModelNotFoundError(AmevaTermuxError):
     DEFAULT_CODE = ErrorCode.MODEL_NOT_FOUND

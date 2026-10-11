@@ -11,6 +11,7 @@ import urllib.request
 import urllib.error
 from pathlib import Path
 from termux_stt.cli.transcribe import run_transcribe
+from termux_stt.exceptions import RuntimeRequiredError
 
 PRIMARY_SAMPLE_URL = "https://raw.githubusercontent.com/uno-km/termux-stt/main/samples/jfk_1min.wav"
 FALLBACK_SAMPLE_URL = "https://raw.githubusercontent.com/uno-km/uno-km/main/lib/forge/samples/jfk_1min.wav"
@@ -69,6 +70,8 @@ def ensure_demo_audio() -> str:
                     break
                 else:
                     last_error = f"Incomplete download ({len(data)} bytes)"
+        except RuntimeRequiredError:
+            raise
         except Exception as err:
             last_error = err
             print(f"[-] Mirror fetch failed ({url}): {err}")

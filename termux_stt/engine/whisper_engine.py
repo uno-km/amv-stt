@@ -48,15 +48,16 @@ class WhisperEngine(Engine):
                 self.runtime = get_runtime()
                 self.router = SmartRouter(self.runtime.profile)
             except ImportError as imp_err:
-                from termux_stt.exceptions import PlatformNotSupportedError, ErrorCode
-                raise PlatformNotSupportedError(
-                    "[ERROR: AMEVA-STT-E001] GPU acceleration requires 'ameva-runtime'.\n"
-                    "Cause: Hardware abstraction provider 'ameva-runtime' is not installed.\n"
-                    "Action Required: Install the hardware acceleration package via:\n"
-                    "  pip install ameva-runtime\n"
-                    "Documentation: https://github.com/uno-km/termux-stt",
-                    code=ErrorCode.RUNTIME_NOT_INSTALLED,
-                ) from imp_err
+                from termux_stt.hardware import _note_cpu_instead, _require_gpu_runtime
+                if dev_lower in ("vulkan", "gpu", "opencl"):
+                    _require_gpu_runtime(dev_lower)  # runtime missing or too old: the shared explanation
+                    from termux_stt.exceptions import PlatformNotSupportedError, ErrorCode
+                    raise PlatformNotSupportedError(
+                        f"[ERROR: AMEVA-STT-E002] ameva-runtime is installed but its core modules failed to import: {imp_err}",
+                        code=ErrorCode.VULKAN_DEVICE,
+                    ) from imp_err
+                _note_cpu_instead("ameva-runtime (AMUDA) is not installed")
+                self.device = "cpu"
             except Exception as exc:
                 from termux_stt.exceptions import TermuxSTTError, PlatformNotSupportedError, ErrorCode
                 if isinstance(exc, TermuxSTTError):
@@ -188,6 +189,9 @@ class WhisperEngine(Engine):
         if dev_mode == "cpu" or sys.platform == "win32":
             return env
 
+        if dev_mode in ("vulkan", "gpu"):
+            from termux_stt.hardware import _require_gpu_runtime
+            _require_gpu_runtime(dev_mode)
         try:
             from ameva_runtime.adapters import SttAdapter
             adapter = SttAdapter()

@@ -4,6 +4,7 @@ import sys
 
 from termux_stt.models.hub import ModelHub
 from termux_stt.models.registry import list_models
+from termux_stt.exceptions import RuntimeRequiredError
 
 
 def run_models(args):
@@ -42,6 +43,8 @@ def run_models(args):
         try:
             path = ModelHub.ensure_model(engine_name, model_name)
             print(f"[+] Model successfully downloaded to: {path}")
+        except RuntimeRequiredError:
+            raise
         except Exception as e:
             print(f"[-] Download failed: {e}")
             sys.exit(1)

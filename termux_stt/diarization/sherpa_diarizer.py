@@ -175,6 +175,8 @@ class SherpaDiarizer:
         if self.device == "opencl" or self.provider == "opencl":
             return "opencl"
         if self.device in ("vulkan", "gpu"):
+            from termux_stt.hardware import _require_gpu_runtime
+            _require_gpu_runtime(self.device)
             return "vulkan"
         return self.provider if self.provider in ("cpu", "cuda", "nnapi") else "cpu"
 

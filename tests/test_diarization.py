@@ -94,13 +94,16 @@ def test_sherpa_diarizer_strict_opencl_protocol():
     assert d_opencl._determine_provider() == "opencl"
 
     # 2. vulkan / gpu -> vulkan provider (never silently opencl)
-    d_vulkan = SherpaDiarizer(device="vulkan")
-    assert d_vulkan._determine_provider() == "vulkan"
-    assert d_vulkan._determine_provider() != "opencl"
+    from unittest.mock import patch
 
-    d_gpu = SherpaDiarizer(device="gpu")
-    assert d_gpu._determine_provider() == "vulkan"
-    assert d_gpu._determine_provider() != "opencl"
+    with patch("ameva_device.runtime_guard.installed_runtime_version", return_value="2.8.1"):
+        d_vulkan = SherpaDiarizer(device="vulkan")
+        assert d_vulkan._determine_provider() == "vulkan"
+        assert d_vulkan._determine_provider() != "opencl"
+
+        d_gpu = SherpaDiarizer(device="gpu")
+        assert d_gpu._determine_provider() == "vulkan"
+        assert d_gpu._determine_provider() != "opencl"
 
     # 3. auto / cpu -> cpu provider (never opencl)
     d_auto = SherpaDiarizer(device="auto")
