@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Uno Kim / AMEVA Foundation. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR Commercial-License
 """
 1-Click Self-Contained Native Engine & Dependency Installer for Termux.
 Provisions ffmpeg, whisper.cpp with ARM NEON / Vulkan, and Sherpa-ONNX Diarization models.

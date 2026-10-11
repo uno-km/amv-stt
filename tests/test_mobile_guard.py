@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Uno Kim / AMEVA Foundation. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR Commercial-License
 from unittest.mock import MagicMock, patch
 
 from termux_stt.platform.mobile_guard import MobileGuard, wake_lock

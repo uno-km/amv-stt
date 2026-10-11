@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Uno Kim / AMEVA Foundation. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR Commercial-License
 from termux_stt import create_engine
 from termux_stt.export.json_export import save_json, to_json
 from termux_stt.export.srt import save_srt, to_srt

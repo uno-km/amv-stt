@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Uno Kim / AMEVA Foundation. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR Commercial-License
 # examples/04_batch_processing.py
 # 실행 방법: python 04_batch_processing.py
 # 디렉토리 내 여러 파일을 배치로 처리합니다.

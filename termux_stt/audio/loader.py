@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Uno Kim / AMEVA Foundation. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR Commercial-License
 """
 Audio loading module for termux-stt.
 Supports multiple formats (wav, mp3, m4a, flac, ogg, opus, webm).

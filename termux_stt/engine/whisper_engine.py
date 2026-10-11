@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Uno Kim / AMEVA Foundation. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR Commercial-License
 """Whisper.cpp engine wrapper ??subprocess-isolated STT for Android Termux.
 
 Runs ``whisper.cpp`` as an external process for crash isolation; a C++

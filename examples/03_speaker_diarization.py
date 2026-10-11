@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Uno Kim / AMEVA Foundation. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR Commercial-License
 # examples/03_speaker_diarization.py
 # 실행 방법: python 03_speaker_diarization.py
 # 이 예제는 화자 분리(Diarization)를 수행합니다.

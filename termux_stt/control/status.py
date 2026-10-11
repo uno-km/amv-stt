@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Uno Kim / AMEVA Foundation. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR Commercial-License
 """
 termux_stt.control.status
 AMEVA Component Protocol v1 — STT 상태 파일 Writer + Heartbeat
