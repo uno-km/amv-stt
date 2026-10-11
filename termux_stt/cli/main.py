@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Uno Kim / AMEVA Foundation. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR Commercial-License
 import argparse
 import sys
 
@@ -9,6 +11,7 @@ from termux_stt.cli.listen import run_listen
 from termux_stt.cli.models_cmd import run_models
 from termux_stt.cli.transcribe import run_transcribe
 from termux_stt.platform.installer import main as run_install
+from termux_stt.web import run_web_app
 
 
 def _run_cli():
@@ -63,6 +66,27 @@ def _run_cli():
     # Listen subcommand
     parser_listen = subparsers.add_parser("listen", parents=[common_parser], help="Real-time mic transcription")
     parser_listen.add_argument("--duration", type=int, default=0, help="Listen duration in seconds (0 for infinite)")
+    parser_listen.add_argument("--diarize", action="store_true", help="Enable online neural speaker diarization")
+    parser_listen.add_argument("--speakers", type=int, default=2, help="Expected number of speakers for online diarization")
+    parser_listen.add_argument("--chunk-sec", type=float, default=2.0, help="Sliding chunk duration in seconds (default: 2.0)")
+
+    # Live subcommand (live real-time mic streaming with diarization)
+    parser_live = subparsers.add_parser("live", parents=[common_parser], help="Real-time live mic listening with online diarization")
+    parser_live.add_argument("--duration", type=int, default=0, help="Listen duration in seconds (0 for infinite)")
+    parser_live.add_argument("--diarize", action="store_true", default=True, help="Enable online neural speaker diarization")
+    parser_live.add_argument("--speakers", type=int, default=2, help="Expected number of speakers for online diarization")
+    parser_live.add_argument("--chunk-sec", type=float, default=2.0, help="Sliding chunk duration in seconds (default: 2.0)")
+
+    # App / Web subcommand (browser-based real-time meeting diarizer PWA)
+    parser_app = subparsers.add_parser("app", parents=[common_parser], help="Launch on-device real-time meeting diarization Web/PWA App")
+    parser_app.add_argument("--host", type=str, default="0.0.0.0", help="HTTP server bind host (default: 0.0.0.0)")
+    parser_app.add_argument("--port", type=int, default=8765, help="HTTP server bind port (default: 8765)")
+    parser_app.add_argument("--speakers", type=int, default=2, help="Expected number of speakers for online diarization")
+
+    parser_web = subparsers.add_parser("web", parents=[common_parser], help="Alias for 'app' command")
+    parser_web.add_argument("--host", type=str, default="0.0.0.0", help="HTTP server bind host (default: 0.0.0.0)")
+    parser_web.add_argument("--port", type=int, default=8765, help="HTTP server bind port (default: 8765)")
+    parser_web.add_argument("--speakers", type=int, default=2, help="Expected number of speakers for online diarization")
 
     # Diarize subcommand
     parser_diarize = subparsers.add_parser("diarize", parents=[common_parser], help="Diarize and transcribe audio file")
@@ -114,10 +138,12 @@ def _run_cli():
         elif not args.file:
             parser_transcribe.error("the following arguments are required: file (or use --demo)")
         run_transcribe(args)
-    elif args.command == "listen":
+    elif args.command in ("listen", "live"):
         run_listen(args)
     elif args.command == "diarize":
         run_diarize(args)
+    elif args.command in ("app", "web"):
+        run_web_app(args)
     elif args.command == "models":
         run_models(args)
     elif args.command == "doctor":

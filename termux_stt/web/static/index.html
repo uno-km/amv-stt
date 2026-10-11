@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Termux STT Live - 온디바이스 실시간 화자분리 회의록</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0ea5e9">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#f0f9ff', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1', 900: '#0c4a6e' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes pulse-ring { 0% { transform: scale(0.95); opacity: 0.8; } 50% { transform: scale(1.15); opacity: 0.4; } 100% { transform: scale(0.95); opacity: 0.8; } }
+    .rec-pulse { animation: pulse-ring 1.5s infinite ease-in-out; }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-brand-500 selection:text-white">
+
+  <!-- TOP HEADER -->
+  <header class="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3">
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-brand-500/20">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="font-bold text-base tracking-tight flex items-center gap-1.5">
+            Termux STT Live
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-brand-500/20 text-brand-400 font-mono border border-brand-500/30">ON-DEVICE</span>
+          </h1>
+          <p class="text-xs text-slate-400">신경망 실시간 음성인식 & 화자분리</p>
+        </div>
+      </div>
+
+      <!-- STATUS BADGE & TIMER -->
+      <div class="flex items-center space-x-2">
+        <div id="statusBadge" class="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 text-xs font-medium text-slate-300">
+          <span class="w-2 h-2 rounded-full bg-slate-500"></span>
+          <span id="statusText">대기 중</span>
+        </div>
+        <div id="timerText" class="font-mono text-xs px-2 py-1 rounded bg-slate-800/80 text-slate-300 border border-slate-700/50">
+          00:00
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTROL PANEL -->
+  <section class="bg-slate-900/50 border-b border-slate-800/80 px-4 py-3">
+    <div class="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- AUDIO SOURCE & REC BUTTON -->
+      <div class="flex items-center space-x-2">
+        <button id="btnToggleRec" onclick="toggleRecording()" class="flex items-center space-x-2 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-medium text-sm transition-all shadow-md active:scale-95">
+          <svg id="recIcon" class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z" fill="none"/></svg>
+          <span id="btnRecText">녹음 시작</span>
+        </button>
+
+        <select id="audioSource" class="bg-slate-800 border border-slate-700 text-xs rounded-xl px-2.5 py-2 text-slate-300 focus:outline-none focus:border-brand-500">
+          <option value="device">단말기 마이크 (Termux Native)</option>
+          <option value="browser">브라우저 마이크 (WebAudio)</option>
+        </select>
+      </div>
+
+      <!-- EXPORT & ACTIONS -->
+      <div class="flex items-center space-x-1.5">
+        <button onclick="exportTranscript('txt')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 border border-slate-700 flex items-center space-x-1">
+          <span>TXT</span>
+        </button>
+        <button onclick="exportTranscript('srt')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 border border-slate-700 flex items-center space-x-1">
+          <span>SRT 자막</span>
+        </button>
+        <button onclick="exportTranscript('json')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 border border-slate-700 flex items-center space-x-1">
+          <span>JSON</span>
+        </button>
+        <button onclick="clearHistory()" class="px-2 py-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 text-xs text-rose-400 border border-rose-800/40" title="화면 비우기">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- AUDIO VISUALIZER CANVAS (FOR BROWSER MIC) -->
+    <div id="visualizerContainer" class="max-w-4xl mx-auto mt-2 hidden">
+      <canvas id="waveformCanvas" class="w-full h-8 rounded-lg bg-slate-950 border border-slate-800/60"></canvas>
+    </div>
+  </section>
+
+  <!-- MAIN CHAT TIMELINE -->
+  <main class="flex-1 max-w-4xl w-full mx-auto p-4 overflow-y-auto space-y-3" id="timelineContainer">
+    <!-- EMPTY STATE -->
+    <div id="emptyState" class="text-center py-20 text-slate-500">
+      <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center">
+        <svg class="w-7 h-7 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+        </svg>
+      </div>
+      <p class="text-sm font-medium">기록된 대화가 없습니다.</p>
+      <p class="text-xs text-slate-600 mt-1">[녹음 시작] 버튼을 누르면 실시간 STT와 화자 분리가 시작됩니다.</p>
+    </div>
+  </main>
+
+  <!-- RENAME SPEAKER MODAL -->
+  <div id="renameModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 max-w-sm w-full shadow-2xl">
+      <h3 class="font-bold text-sm text-slate-200 mb-1">화자 이름 변경</h3>
+      <p class="text-xs text-slate-400 mb-3" id="modalOldName">현재 이름: Speaker_1</p>
+      <input type="text" id="inputNewName" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-500 mb-4" placeholder="새로운 화자 이름 (예: 김은호)">
+      <div class="flex justify-end space-x-2">
+        <button onclick="closeRenameModal()" class="px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:bg-slate-800">취소</button>
+        <button onclick="submitRenameSpeaker()" class="px-4 py-1.5 rounded-lg text-xs bg-brand-600 hover:bg-brand-500 text-white font-medium">저장하기</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let isRecording = false;
+    let timerInterval = null;
+    let elapsedSeconds = 0;
+    let eventSource = null;
+    let activeRenamingTarget = null;
+    let speakerColorMap = {};
+    const colorPalette = [
+      { bg: 'bg-indigo-950/60', border: 'border-indigo-800/50', badge: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' },
+      { bg: 'bg-emerald-950/60', border: 'border-emerald-800/50', badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
+      { bg: 'bg-amber-950/60', border: 'border-amber-800/50', badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30' },
+      { bg: 'bg-purple-950/60', border: 'border-purple-800/50', badge: 'bg-purple-500/20 text-purple-300 border-purple-500/30' },
+    ];
+
+    // WebAudio Ingestion
+    let audioContext = null;
+    let mediaStream = null;
+    let scriptProcessor = null;
+
+    function getSpeakerStyle(spk) {
+      if (!speakerColorMap[spk]) {
+        const idx = Object.keys(speakerColorMap).length % colorPalette.length;
+        speakerColorMap[spk] = colorPalette[idx];
+      }
+      return speakerColorMap[spk];
+    }
+
+    function initSSE() {
+      eventSource = new EventSource('/api/events');
+      eventSource.addEventListener('init', (e) => {
+        const data = JSON.parse(e.data);
+        if (data.history && data.history.length > 0) {
+          document.getElementById('emptyState').classList.add('hidden');
+          data.history.forEach(appendSegment);
+        }
+        if (data.is_recording) setRecordingUI(true);
+      });
+
+      eventSource.addEventListener('segment', (e) => {
+        const data = JSON.parse(e.data);
+        document.getElementById('emptyState').classList.add('hidden');
+        appendSegment(data);
+      });
+
+      eventSource.addEventListener('speaker_renamed', (e) => {
+        const { old_name, new_name } = JSON.parse(e.data);
+        document.querySelectorAll(`[data-speaker-raw="${old_name}"]`).forEach(el => {
+          el.innerText = new_name;
+        });
+      });
+
+      eventSource.addEventListener('session_state', (e) => {
+        const { is_recording } = JSON.parse(e.data);
+        setRecordingUI(is_recording);
+      });
+
+      eventSource.addEventListener('history_cleared', () => {
+        document.getElementById('timelineContainer').innerHTML = `
+          <div id="emptyState" class="text-center py-20 text-slate-500">
+            <p class="text-sm font-medium">기록된 대화가 없습니다.</p>
+          </div>
+        `;
+      });
+    }
+
+    function appendSegment(seg) {
+      const container = document.getElementById('timelineContainer');
+      const style = getSpeakerStyle(seg.raw_speaker);
+
+      const card = document.createElement('div');
+      card.className = `p-3.5 rounded-2xl border ${style.bg} ${style.border} transition-all duration-200 hover:border-slate-700 animate-fadeIn`;
+      card.innerHTML = `
+        <div class="flex items-center justify-between mb-1.5">
+          <button onclick="openRenameModal('${seg.raw_speaker}', '${seg.speaker}')" class="flex items-center space-x-1.5 px-2 py-0.5 rounded-md text-xs font-semibold border ${style.badge} hover:brightness-110 active:scale-95 transition">
+            <svg class="w-3 h-3 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            <span data-speaker-raw="${seg.raw_speaker}">${seg.speaker}</span>
+          </button>
+          <div class="text-[11px] font-mono text-slate-400">
+            ${seg.timestamp || ''} <span class="text-slate-600">(${seg.start.toFixed(1)}s -> ${seg.end.toFixed(1)}s)</span>
+          </div>
+        </div>
+        <div class="text-sm text-slate-100 leading-relaxed font-normal pl-0.5">
+          ${seg.text}
+        </div>
+      `;
+      container.appendChild(card);
+      card.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+
+    async function toggleRecording() {
+      const source = document.getElementById('audioSource').value;
+      if (!isRecording) {
+        if (source === 'browser') {
+          await startBrowserMicCapture();
+        }
+        await fetch('/api/mic/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ source: source })
+        });
+      } else {
+        if (mediaStream) {
+          mediaStream.getTracks().forEach(t => t.stop());
+          mediaStream = null;
+        }
+        if (audioContext) {
+          audioContext.close();
+          audioContext = null;
+        }
+        await fetch('/api/mic/stop', { method: 'POST' });
+      }
+    }
+
+    function setRecordingUI(active) {
+      isRecording = active;
+      const btn = document.getElementById('btnToggleRec');
+      const text = document.getElementById('btnRecText');
+      const badge = document.getElementById('statusBadge');
+      const statusText = document.getElementById('statusText');
+
+      if (active) {
+        btn.className = 'flex items-center space-x-2 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-medium text-sm transition-all shadow-md active:scale-95';
+        text.innerText = '녹음 중지';
+        badge.className = 'flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-rose-950/60 border border-rose-800 text-xs font-medium text-rose-300';
+        badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-rose-500 rec-pulse"></span><span>녹음 중</span>';
+        startTimer();
+      } else {
+        btn.className = 'flex items-center space-x-2 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-medium text-sm transition-all shadow-md active:scale-95';
+        text.innerText = '녹음 시작';
+        badge.className = 'flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 text-xs font-medium text-slate-300';
+        badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-slate-500"></span><span>대기 중</span>';
+        stopTimer();
+      }
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      elapsedSeconds = 0;
+      timerInterval = setInterval(() => {
+        elapsedSeconds++;
+        const mins = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
+        const secs = String(elapsedSeconds % 60).padStart(2, '0');
+        document.getElementById('timerText').innerText = `${mins}:${secs}`;
+      }, 1000);
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+    }
+
+    async function startBrowserMicCapture() {
+      document.getElementById('visualizerContainer').classList.remove('hidden');
+      audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+      mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const source = audioContext.createMediaStreamSource(mediaStream);
+      scriptProcessor = audioContext.createScriptProcessor(4096, 1, 1);
+
+      scriptProcessor.onaudioprocess = (e) => {
+        if (!isRecording) return;
+        const inputData = e.inputBuffer.getChannelData(0);
+        // Convert Float32 to 16-bit PCM
+        const pcm16 = new Int16Array(inputData.length);
+        for (let i = 0; i < inputData.length; i++) {
+          const s = Math.max(-1, Math.min(1, inputData[i]));
+          pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+        }
+        fetch('/api/stream_audio', {
+          method: 'POST',
+          body: pcm16.buffer
+        }).catch(() => {});
+      };
+
+      source.connect(scriptProcessor);
+      scriptProcessor.connect(audioContext.destination);
+    }
+
+    function openRenameModal(rawSpeaker, currentName) {
+      activeRenamingTarget = rawSpeaker;
+      document.getElementById('modalOldName').innerText = `현재 이름: ${currentName}`;
+      document.getElementById('inputNewName').value = currentName;
+      document.getElementById('renameModal').classList.remove('hidden');
+      document.getElementById('inputNewName').focus();
+    }
+
+    function closeRenameModal() {
+      document.getElementById('renameModal').classList.add('hidden');
+      activeRenamingTarget = null;
+    }
+
+    async function submitRenameSpeaker() {
+      const newName = document.getElementById('inputNewName').value.trim();
+      if (!newName || !activeRenamingTarget) return;
+
+      await fetch('/api/rename_speaker', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ old_name: activeRenamingTarget, new_name: newName })
+      });
+      closeRenameModal();
+    }
+
+    function exportTranscript(fmt) {
+      window.location.href = `/api/export?format=${fmt}`;
+    }
+
+    async function clearHistory() {
+      if (confirm('대화 기록을 모두 비우시겠습니까?')) {
+        await fetch('/api/clear', { method: 'POST' });
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', initSSE);
+  </script>
+</body>
+</html>

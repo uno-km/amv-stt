@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Uno Kim / AMEVA Foundation. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR Commercial-License
 """Sherpa-ONNX engine wrapper ??ONNX Runtime based STT for Termux.
 
 Supports Zipformer streaming/offline models, SenseVoice, and CAM++
@@ -652,6 +654,75 @@ class SherpaEngine(Engine):
             duration=audio_dur,
             speakers=speakers,
         )
+
+    def stream_mic_diarize(
+        self,
+        duration: Optional[float] = None,
+        chunk_sec: float = 2.0,
+        num_speakers: Optional[int] = None,
+        enroll_speakers: Optional[Dict[str, bytes]] = None,
+        **kwargs: Any,
+    ) -> Iterator[Segment]:
+        """Stream real-time microphone audio with simultaneous online neural speaker diarization."""
+        import tempfile
+        from termux_stt.audio.mic import MicCapture
+        from termux_stt.diarization.online_diarizer import OnlineSpeakerDiarizer
+
+        mic = MicCapture()
+        effective_num_speakers = num_speakers if num_speakers is not None else self.config.num_speakers
+        diarizer = OnlineSpeakerDiarizer(
+            num_speakers=effective_num_speakers,
+            threads=self.config.threads or 4,
+            device=self.config.device or "cpu",
+        )
+
+        if enroll_speakers:
+            for spk_name, spk_pcm in enroll_speakers.items():
+                diarizer.enroll_speaker(spk_name, spk_pcm)
+
+        time_offset = 0.0
+        stream_iter = (
+            mic.stream_continuous(duration=duration, chunk_sec=chunk_sec)
+            if hasattr(mic, "stream_continuous")
+            else mic.stream(duration=duration, chunk_sec=chunk_sec)
+        )
+
+        for chunk_bytes in stream_iter:
+            chunk_duration = len(chunk_bytes) / (16000 * 2)
+            seg_start = time_offset
+            seg_end = time_offset + chunk_duration
+            time_offset = seg_end
+
+            spk_info = diarizer.process_chunk(chunk_bytes, start_sec=seg_start, end_sec=seg_end)
+            if not spk_info.is_speech:
+                continue
+
+            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+                tmp_path = tmp.name
+                import wave
+                with wave.open(tmp_path, "wb") as wf:
+                    wf.setnchannels(1)
+                    wf.setsampwidth(2)
+                    wf.setframerate(16000)
+                    wf.writeframes(chunk_bytes)
+
+            try:
+                trans_res = self.transcribe(tmp_path, **kwargs)
+                text = trans_res.text.strip()
+                if text:
+                    yield Segment(
+                        start=seg_start,
+                        end=seg_end,
+                        text=text,
+                        speaker=spk_info.speaker,
+                        confidence=spk_info.confidence,
+                    )
+            finally:
+                if os.path.exists(tmp_path):
+                    try:
+                        os.unlink(tmp_path)
+                    except OSError:
+                        pass
 
     def get_info(self) -> Dict[str, Any]:
         """Return engine status information."""

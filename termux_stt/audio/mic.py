@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Uno Kim / AMEVA Foundation. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR Commercial-License
 """
 Microphone capture for Termux using termux-api.
 """
@@ -36,6 +38,74 @@ class MicCapture:
         self._is_recording = False
         self._output_path = None
 
+    def stream_continuous(
+        self,
+        duration: Optional[float] = None,
+        chunk_sec: float = 1.5,
+        sample_rate: int = 16000,
+    ) -> Iterator[bytes]:
+        """Stream continuous 16kHz mono 16-bit PCM chunks directly via stdout pipe.
+        
+        Attempts continuous background subprocess (ffmpeg/parec/arecord) to eliminate
+        inter-chunk gaps. Falls back to stream() if direct pipe is unavailable.
+        """
+        import os
+        import shutil
+        import time
+
+        bytes_per_second = sample_rate * 2  # 16-bit mono = 2 bytes per sample
+        chunk_size = int(bytes_per_second * chunk_sec)
+        start_time = time.time()
+
+        proc = None
+        cmd = None
+        if shutil.which("ffmpeg"):
+            # Attempt default OS/Termux audio capture device
+            # Android/Linux OpenSL ES, ALSA default, or PulseAudio
+            cmd = [
+                "ffmpeg",
+                "-f", "alsa", "-i", "default",
+                "-ar", str(sample_rate),
+                "-ac", "1",
+                "-f", "s16le",
+                "-loglevel", "quiet",
+                "-"
+            ]
+        elif shutil.which("parec"):
+            cmd = ["parec", "--rate", str(sample_rate), "--channels", "1", "--format", "s16le"]
+        elif shutil.which("arecord"):
+            cmd = ["arecord", "-r", str(sample_rate), "-c", "1", "-f", "S16_LE", "-t", "raw", "-q"]
+
+        if cmd:
+            try:
+                proc = subprocess.Popen(
+                    cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.DEVNULL,
+                    bufsize=chunk_size * 2,
+                )
+                while True:
+                    if duration is not None and (time.time() - start_time) >= duration:
+                        break
+                    raw_data = proc.stdout.read(chunk_size)
+                    if not raw_data:
+                        break
+                    yield raw_data
+                return
+            except Exception:
+                # If continuous pipe fails to initialize, gracefully fall back to file chunk recorder
+                pass
+            finally:
+                if proc and proc.poll() is None:
+                    proc.terminate()
+                    try:
+                        proc.wait(timeout=1.0)
+                    except Exception:
+                        proc.kill()
+
+        # Fallback to discrete chunk recorder
+        yield from self.stream(duration=duration, chunk_sec=chunk_sec, sample_rate=sample_rate)
+
     def stream(self, duration: Optional[float] = None, chunk_sec: float = 2.0, sample_rate: int = 16000) -> Iterator[bytes]:
         """Stream 16kHz PCM chunks from mic."""
         import os
@@ -46,10 +116,7 @@ class MicCapture:
 
         start_time = time.time()
 
-        # Method A: FFmpeg or ALSA/Pulse/Direct pipe capture if available
-        # (Chunk-based capture handled below)
-
-        # Method B: Robust chunk-based capture for Termux termux-microphone-record
+        # Method: Robust chunk-based capture for Termux termux-microphone-record
         while True:
             if duration is not None and (time.time() - start_time) >= duration:
                 break

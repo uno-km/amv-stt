@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Uno Kim / AMEVA Foundation. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR Commercial-License
 """Hybrid STT engine ??Sherpa-ONNX Neural Diarization (PyAnnote 3.0 + CAM++ 192d) + Whisper.cpp STT.
 
 This is the crown jewel of termux-stt: a single ``create_engine("hybrid")``
@@ -172,6 +174,102 @@ class HybridEngine(Engine):
     ) -> Iterator[Segment]:
         """Stream transcription from the device microphone (delegated to Whisper)."""
         yield from self._whisper.stream_mic(duration=duration)
+
+    def stream_mic_diarize(
+        self,
+        duration: Optional[float] = None,
+        chunk_sec: float = 2.0,
+        num_speakers: Optional[int] = None,
+        enroll_speakers: Optional[Dict[str, bytes]] = None,
+        **kwargs: Any,
+    ) -> Iterator[Segment]:
+        """Stream real-time microphone audio with simultaneous online neural speaker diarization.
+
+        Parameters
+        ----------
+        duration : Optional[float]
+            Maximum duration in seconds (None for continuous indefinite stream).
+        chunk_sec : float
+            Audio sliding chunk length in seconds (default: 2.0s).
+        num_speakers : Optional[int]
+            Expected maximum number of distinct speakers.
+        enroll_speakers : Optional[Dict[str, bytes]]
+            Mapping of speaker names to PCM voiceprints enrolled prior to session.
+        kwargs : Any
+            Additional options passed to underlying transcription.
+
+        Yields
+        ------
+        Segment
+            Real-time transcribed segments populated with identified speaker labels.
+        """
+        import tempfile
+        from termux_stt.audio.mic import MicCapture
+        from termux_stt.diarization.online_diarizer import OnlineSpeakerDiarizer
+
+        mic = MicCapture()
+        effective_num_speakers = num_speakers if num_speakers is not None else self.config.num_speakers
+        diarizer = OnlineSpeakerDiarizer(
+            num_speakers=effective_num_speakers,
+            threads=self.config.threads or 4,
+            device=self.config.device or "cpu",
+        )
+
+        if enroll_speakers:
+            for spk_name, spk_pcm in enroll_speakers.items():
+                diarizer.enroll_speaker(spk_name, spk_pcm)
+
+        time_offset = 0.0
+        # Use stream_continuous if available to prevent inter-chunk recording gap
+        stream_iter = (
+            mic.stream_continuous(duration=duration, chunk_sec=chunk_sec)
+            if hasattr(mic, "stream_continuous")
+            else mic.stream(duration=duration, chunk_sec=chunk_sec)
+        )
+
+        for chunk_bytes in stream_iter:
+            chunk_duration = len(chunk_bytes) / (16000 * 2)
+            seg_start = time_offset
+            seg_end = time_offset + chunk_duration
+            time_offset = seg_end
+
+            # 1. Online neural speaker identification
+            spk_info = diarizer.process_chunk(chunk_bytes, start_sec=seg_start, end_sec=seg_end)
+            if not spk_info.is_speech:
+                continue
+
+            # 2. STT transcription for the speech segment
+            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+                tmp_path = tmp.name
+                self._whisper._write_wav(tmp, chunk_bytes, sample_rate=16000)
+
+            try:
+                trans_res = self._whisper.transcribe(tmp_path, **kwargs)
+                text = trans_res.text.strip()
+                if text:
+                    if trans_res.segments:
+                        for s in trans_res.segments:
+                            yield Segment(
+                                start=seg_start + s.start,
+                                end=seg_start + s.end,
+                                text=s.text,
+                                speaker=spk_info.speaker,
+                                confidence=s.confidence or spk_info.confidence,
+                            )
+                    else:
+                        yield Segment(
+                            start=seg_start,
+                            end=seg_end,
+                            text=text,
+                            speaker=spk_info.speaker,
+                            confidence=spk_info.confidence,
+                        )
+            finally:
+                if os.path.exists(tmp_path):
+                    try:
+                        os.unlink(tmp_path)
+                    except OSError:
+                        pass
 
     def stream_file(
         self, audio_path: str, chunk_sec: float = 5.0
