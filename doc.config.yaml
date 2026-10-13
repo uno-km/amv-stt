@@ -1,492 +1,154 @@
-# docs/doc.config.yaml
-name: "Termux-STT"
-package_name_pypi: "termux-stt"
-package_name_npm: "termux-stt"
-version: "v2.1.0"
-release_name: "Neural Multi-Speaker Diarization & Concurrent GPU/CPU Pipeline"
-license: "Apache-2.0"
-platform: "Android ARM64 / Termux Bionic"
-github_repo_url: "https://github.com/uno-km/termux-stt"
-homepage_url: "https://uno-km.vercel.app/lib/stt/"
-doc_url: "https://uno-km.vercel.app/lib/stt/"
+name: Termux-STT
+package_name_pypi: termux-stt
+package_name_npm: termux-stt
+version: v2.1.0
+release_name: Neural Multi-Speaker Diarization & Concurrent GPU/CPU Pipeline
+license: Apache-2.0
+platform: Android ARM64 / Termux Bionic
+github_repo_url: https://github.com/uno-km/termux-stt
+homepage_url: https://uno-km.vercel.app/lib/stt/
+doc_url: https://uno-km.vercel.app/lib/stt/
+tagline_en: Unified On-Device Speech-to-Text & Neural Multi-Speaker Diarization (PyAnnote 3.0 + CAM++ 192d + TS-VAD Overlap Resolver)
+tagline_ko: 디바이스 리소스를 활용한 통합 온디바이스 음성인식(STT) 및 차세대 신경망 화자 분리(PyAnnote 3.0 + CAM++ 192d + TS-VAD) 프레임워크
+quick_install_cmd: 'pip install --upgrade termux-stt && termux-stt install
 
-tagline_en: "Unified On-Device Speech-to-Text & Neural Multi-Speaker Diarization (PyAnnote 3.0 + CAM++ 192d + TS-VAD Overlap Resolver)"
-tagline_ko: "디바이스 리소스를 활용한 통합 온디바이스 음성인식(STT) 및 차세대 신경망 화자 분리(PyAnnote 3.0 + CAM++ 192d + TS-VAD) 프레임워크"
+  # or Node.js:
 
-quick_install_cmd: "pip install --upgrade termux-stt && termux-stt install\n# or Node.js:\nnpm install -g termux-stt && termux-stt install"
-
-why_challenge_en: "Transcribing and diarizing multi-speaker conversations on edge devices typically demands heavy PyTorch runtimes (>2GB), external GPU servers, and severe cloud network latency with audio privacy risks."
-why_challenge_ko: "모바일 및 엣지 단말기에서 다중 화자 음성 인식 및 화자 분리를 수행하려면 2GB 이상의 무거운 PyTorch 런타임, 클라우드 API 호출 비용, 오디오 개인정보 유출 위험 및 심각한 지연시간이 발생합니다."
-
-description_en: "Integrates Whisper.cpp (Native Vulkan GPU / NEON CPU) and Sherpa-ONNX with PyAnnote 3.0 neural segmentation, 3D-Speaker CAM++ 192-dim embeddings, and TS-VAD overlapped speech resolution with zero cloud egress."
-description_ko: "Whisper.cpp(네이티브 Vulkan GPU / NEON CPU) 및 Sherpa-ONNX 듀얼 모던 엔진을 통합하고, PyAnnote 3.0 신경망 세그멘테이션, 3D-Speaker CAM++ 192차원 성문 임베딩, TS-VAD 동시 발화(마이크 물림) 분리기를 결합하여 완전 온디바이스 실시간 다중 화자 음성인식을 구현합니다."
-
+  npm install -g termux-stt && termux-stt install'
+why_challenge_en: Transcribing and diarizing multi-speaker conversations on edge devices typically demands heavy PyTorch runtimes (>2GB), external GPU servers, and severe cloud network latency with audio privacy risks.
+why_challenge_ko: 모바일 및 엣지 단말기에서 다중 화자 음성 인식 및 화자 분리를 수행하려면 2GB 이상의 무거운 PyTorch 런타임, 클라우드 API 호출 비용, 오디오 개인정보 유출 위험 및 심각한 지연시간이 발생합니다.
+description_en: Integrates Whisper.cpp (Native Vulkan GPU / NEON CPU) and Sherpa-ONNX with PyAnnote 3.0 neural segmentation, 3D-Speaker CAM++ 192-dim embeddings, and TS-VAD overlapped speech resolution with zero cloud egress.
+description_ko: Whisper.cpp(네이티브 Vulkan GPU / NEON CPU) 및 Sherpa-ONNX 듀얼 모던 엔진을 통합하고, PyAnnote 3.0 신경망 세그멘테이션, 3D-Speaker CAM++ 192차원 성문 임베딩, TS-VAD 동시 발화(마이크 물림) 분리기를 결합하여 완전 온디바이스 실시간 다중 화자 음성인식을 구현합니다.
 features:
-  - title_en: "Asymmetric Vulkan GPU / CPU Hybrid Pipeline"
-    title_ko: "비대칭 GPU/CPU 하이브리드 가속 파이프라인"
-    desc_en: "Offloads dense audio encoder GEMMs to Vulkan mobile GPUs while retaining single-token sequential autoregressive decoding on host ARM NEON CPU SIMD vector units, achieving up to 21% lower latency."
-    desc_ko: "연산 집약적인 오디오 인코더 GEMM은 모바일 Vulkan GPU로 오프로딩하고, 단일 토큰 순차 자기회귀 디코더는 호스트 ARM NEON CPU SIMD에서 실행하여 최대 21%의 지연시간 단축과 발열 차단을 달성합니다."
-  - title_en: "Dual Modern STT Engine Architecture"
-    title_ko: "듀얼 모던 STT 엔진 아키텍처"
-    desc_en: "Seamlessly switches between Whisper.cpp (high accuracy, Vulkan GPU/CPU) and Sherpa-ONNX SenseVoice (ultra-low latency on-device ASR) via a unified create_engine() factory."
-    desc_ko: "단일 create_engine() 팩토리 API를 통해 Whisper.cpp(정밀도, Vulkan GPU/CPU 가속)와 Sherpa-ONNX SenseVoice(초저지연 온디바이스 ASR) 모던 엔진을 자유롭게 전환합니다."
-  - title_en: "Next-Gen Neural Diarization (PyAnnote 3.0 + CAM++ 192d)"
-    title_ko: "차세대 신경망 화자 분리 (PyAnnote 3.0 + CAM++ 192d)"
-    desc_en: "Deploys PyAnnote 3.0 neural segmentation ONNX combined with Alibaba 3D-Speaker CAM++ 192-dimensional d-vector embeddings, achieving high speaker clustering accuracy without PyTorch."
-    desc_ko: "PyTorch 런타임 없이도 PyAnnote 3.0 ONNX 세그멘테이션과 Alibaba 3D-Speaker CAM++ 192차원 성문 임베딩을 결합하여 고정밀 다중 화자 군집화를 구현합니다."
-  - title_en: "TS-VAD Overlapped Speech Resolution"
-    title_ko: "TS-VAD 동시 발화(마이크 물림) 분리"
-    desc_en: "Resolves cross-talk and sudden interruptions (e.g., overlapping questions) into distinct speaker audio streams using target-speaker acoustic scanning."
-    desc_ko: "대화 중 끼어들기나 동시 발화('왜요?' 등 마이크 물림 현상) 구간을 타깃 화자 음향 스캐닝을 통해 개별 화자 스트림으로 정확히 분리합니다."
-  - title_en: "Zero Cloud Egress Audio Privacy"
-    title_ko: "완전 온디바이스 로컬 보안"
-    desc_en: "Audio capture, acoustic feature extraction, neural diarization, and text transcription execute strictly on local mobile hardware without network egress."
-    desc_ko: "음성 수집, 음향 특징 추출, 신경망 화자 분리, 텍스트 전사 및 자막 생성이 외부 네트워크 전송 없이 단말기 로컬 하드웨어에서만 독립 구동됩니다."
-  - title_en: "Subprocess Crash Isolation"
-    title_ko: "서브프로세스 장애 격리 보호"
-    desc_en: "Isolates native C++ binaries within dedicated process pools, ensuring C++ segfaults never compromise the host Python or Node.js runtime."
-    desc_ko: "C++ 네이티브 엔진을 전용 서브프로세스 풀로 완벽 격리하여 C++ 세그멘테이션 폴트가 발생해도 호스트 런타임의 안전성을 신뢰성 높게 보장합니다."
-  - title_en: "Modular & Interactive Model Provisioning"
-    title_ko: "모듈식 및 대화형 모델 프로비저닝"
-    desc_en: "Keeps standard installation lightweight while offering on-demand neural diarization installation (--engine diarization / --all) with interactive TTY [y/N] prompts."
-    desc_ko: "기본 설치는 가볍게 유지하며, 화자 분리가 필요할 때만 선별 설치(--engine diarization / --all)하거나 CLI 대화형 [y/N] 프롬프트로 자동 안내합니다."
-
+- title_en: Asymmetric Vulkan GPU / CPU Hybrid Pipeline
+  title_ko: 비대칭 GPU/CPU 하이브리드 가속 파이프라인
+  desc_en: Offloads dense audio encoder GEMMs to Vulkan mobile GPUs while retaining single-token sequential autoregressive decoding on host ARM NEON CPU SIMD vector units, achieving up to 21% lower latency.
+  desc_ko: 연산 집약적인 오디오 인코더 GEMM은 모바일 Vulkan GPU로 오프로딩하고, 단일 토큰 순차 자기회귀 디코더는 호스트 ARM NEON CPU SIMD에서 실행하여 최대 21%의 지연시간 단축과 발열 차단을 달성합니다.
+- title_en: Dual Modern STT Engine Architecture
+  title_ko: 듀얼 모던 STT 엔진 아키텍처
+  desc_en: Seamlessly switches between Whisper.cpp (high accuracy, Vulkan GPU/CPU) and Sherpa-ONNX SenseVoice (ultra-low latency on-device ASR) via a unified create_engine() factory.
+  desc_ko: 단일 create_engine() 팩토리 API를 통해 Whisper.cpp(정밀도, Vulkan GPU/CPU 가속)와 Sherpa-ONNX SenseVoice(초저지연 온디바이스 ASR) 모던 엔진을 자유롭게 전환합니다.
+- title_en: Next-Gen Neural Diarization (PyAnnote 3.0 + CAM++ 192d)
+  title_ko: 차세대 신경망 화자 분리 (PyAnnote 3.0 + CAM++ 192d)
+  desc_en: Deploys PyAnnote 3.0 neural segmentation ONNX combined with Alibaba 3D-Speaker CAM++ 192-dimensional d-vector embeddings, achieving high speaker clustering accuracy without PyTorch.
+  desc_ko: PyTorch 런타임 없이도 PyAnnote 3.0 ONNX 세그멘테이션과 Alibaba 3D-Speaker CAM++ 192차원 성문 임베딩을 결합하여 고정밀 다중 화자 군집화를 구현합니다.
+- title_en: TS-VAD Overlapped Speech Resolution
+  title_ko: TS-VAD 동시 발화(마이크 물림) 분리
+  desc_en: Resolves cross-talk and sudden interruptions (e.g., overlapping questions) into distinct speaker audio streams using target-speaker acoustic scanning.
+  desc_ko: 대화 중 끼어들기나 동시 발화('왜요?' 등 마이크 물림 현상) 구간을 타깃 화자 음향 스캐닝을 통해 개별 화자 스트림으로 정확히 분리합니다.
+- title_en: Zero Cloud Egress Audio Privacy
+  title_ko: 완전 온디바이스 로컬 보안
+  desc_en: Audio capture, acoustic feature extraction, neural diarization, and text transcription execute strictly on local mobile hardware without network egress.
+  desc_ko: 음성 수집, 음향 특징 추출, 신경망 화자 분리, 텍스트 전사 및 자막 생성이 외부 네트워크 전송 없이 단말기 로컬 하드웨어에서만 독립 구동됩니다.
+- title_en: Subprocess Crash Isolation
+  title_ko: 서브프로세스 장애 격리 보호
+  desc_en: Isolates native C++ binaries within dedicated process pools, ensuring C++ segfaults never compromise the host Python or Node.js runtime.
+  desc_ko: C++ 네이티브 엔진을 전용 서브프로세스 풀로 완벽 격리하여 C++ 세그멘테이션 폴트가 발생해도 호스트 런타임의 안전성을 신뢰성 높게 보장합니다.
+- title_en: Modular & Interactive Model Provisioning
+  title_ko: 모듈식 및 대화형 모델 프로비저닝
+  desc_en: Keeps standard installation lightweight while offering on-demand neural diarization installation (--engine diarization / --all) with interactive TTY [y/N] prompts.
+  desc_ko: 기본 설치는 가볍게 유지하며, 화자 분리가 필요할 때만 선별 설치(--engine diarization / --all)하거나 CLI 대화형 [y/N] 프롬프트로 자동 안내합니다.
 matrix_table:
-  - category: "Asymmetric Hybrid Pipeline"
-    operations: "Vulkan GPU Audio Encoder + ARM NEON CPU Sequential Decoder (--split-mode / --optimize-1)"
-    status: "Production"
-  - category: "Speech Recognition (STT)"
-    operations: "Whisper.cpp (tiny/base/small/medium/large-v3-turbo), Sherpa-ONNX (SenseVoice)"
-    status: "Production"
-  - category: "Speaker Diarization"
-    operations: "PyAnnote 3.0 ONNX, 3D-Speaker CAM++ 192d, TS-VAD OverlapResolver, Cosine K-Means"
-    status: "Production"
-  - category: "Audio Preprocessing"
-    operations: "Zero-Subprocess Wave Parser, FFmpeg Auto-Fallback, Silero-VAD Silence Filter"
-    status: "Production"
-  - category: "Subtitle & Data Formats"
-    operations: "SubRip (SRT), WebVTT (VTT), NIST Rich Transcription (RTTM), Structured JSON"
-    status: "Production"
-  - category: "Platform Runtimes"
-    operations: "Android Termux (Bionic ARM64/aarch64), Python 3.8~3.13, Node.js 16~22"
-    status: "Production"
-
-code_example_py: |
-  from termux_stt import create_engine
-
-  # 1. Initialize Whisper Engine with Vulkan GPU / CPU Hybrid Acceleration
-  engine = create_engine("whisper", model="small", lang="ko", threads=4, split_mode=True)
-
-  # 2. Transcribe Audio directly into Subtitles
-  result = engine.transcribe("samples/jfk_1min.wav")
-  print("Transcript:\n", result.text)
-  print("SRT Subtitles:\n", result.to_srt())
-
-  # 3. Multi-Speaker Neural Diarization (PyAnnote 3.0 + CAM++ 192d + TS-VAD)
-  hybrid = create_engine("hybrid", lang="ko", num_speakers=2)
-  diar_result = hybrid.diarize("samples/kor_diarization.wav")
-  for seg in diar_result.segments:
-      print(f"[{seg.speaker}] ({seg.start:.1f}s -> {seg.end:.1f}s): {seg.text}")
-
-code_example_js: |
-  const { createEngine } = require("termux-stt");
-
-  async function main() {
-    // 1. Initialize Whisper Engine
-    const engine = createEngine("whisper", { model: "tiny", lang: "ko", threads: 4 });
-
-    // 2. Transcribe Audio
-    const result = await engine.transcribe("samples/jfk_1min.wav");
-    console.log("Transcript:", result.text);
-    console.log("SRT Subtitles:\n", result.toSrt());
-
-    // 3. Neural Diarization via Hybrid Engine
-    const hybrid = createEngine("hybrid", { lang: "ko", numSpeakers: 2 });
-    const diarResult = await hybrid.diarize("samples/kor_diarization.wav");
-    for (const seg of diarResult.segments) {
-      console.log(`[${seg.speaker}] (${seg.start.toFixed(1)}s -> ${seg.end.toFixed(1)}s): ${seg.text}`);
-    }
-  }
-  main();
-
-installation_body: |
-  <div class="alert alert-tip">
-    <span class="alert-title">Target-Aware Automated Installation</span>
-    <p><code>termux-stt</code> provisions native ARM64 Whisper binaries and system dependencies out-of-the-box. Neural speaker diarization models can be installed selectively to preserve mobile storage.</p>
-  </div>
-
-  <h3>1. Automated Package Installation</h3>
-  
-  <h4>Python Edition (PyPI):</h4>
-  <pre><code># 1. Install official PyPI package
-  pip install --upgrade termux-stt
-
-  # 2. Standard lightweight setup (Whisper STT + FFmpeg)
-  termux-stt install
-
-  # 3. Optional: Full Neural Diarization Provisioning (PyAnnote + CAM++ 192d)
-  termux-stt install --engine diarization
-  # Or full setup in one command:
-  termux-stt install --all</code></pre>
-
-  <h4>Node.js / TypeScript Edition (npm):</h4>
-  <pre><code># 1. Install official global npm package
-  npm install -g termux-stt
-
-  # 2. Standard setup
-  termux-stt install
-
-  # 3. Full installation
-  termux-stt install --all</code></pre>
-
-  <h3>2. Interactive Auto-Provisioning</h3>
-  <p>If you run diarization without having installed the neural models, the CLI automatically detects the missing components in interactive terminal sessions and prompts: <code>[?] Neural Diarization models are missing. Download now? [y/N]:</code>.</p>
-
-  <h3>3. Android Termux Prerequisites & System Dependencies</h3>
-  <p>If you are provisioning a clean Android Termux environment from scratch, execute the following system package installations:</p>
-  <pre><code># Update Termux repository index and install native toolchain
-  pkg update -y && pkg install -y \
-    python \
-    nodejs-lts \
-    ffmpeg \
-    libbluray \
-    libxml2 \
-    cmake \
-    make \
-    clang \
-    git \
-    termux-api</code></pre>
-
-  <h3>4. Self-Healing Diagnostic Health Check</h3>
-  <p>Verify that your system environment, audio linkers, and ARM NEON binaries are fully functional:</p>
-  <pre><code>termux-stt doctor</code></pre>
-
-quickstart_body: |
-  <div class="alert alert-tip">
-    <span class="alert-title">Included Sample Audio Benchmark Suite</span>
-    <p><code>termux-stt</code> packages benchmark audio samples in <code>samples/</code>:</p>
-    <ul>
-      <li><code>samples/jfk_1min.wav</code>: English Speech Benchmark (60.00s, 16kHz Mono)</li>
-      <li><code>samples/kor_diarization.wav</code>: Korean Real Podcast 2-Speaker Cross-Talk Benchmark (45.00s, 16kHz Mono)</li>
-      <li><code>samples/3_speaker_test.wav</code>: 3-Speaker Multi-Conversation Benchmark (15.00s, 16kHz Mono)</li>
-    </ul>
-  </div>
-
-  <h3>Recipe 1: 1-Line Subtitle Transcription (SRT / WebVTT / JSON)</h3>
-  <pre><code># 1. Transcribe audio and export to synchronized SRT subtitles
-  termux-stt transcribe samples/jfk_1min.wav --format srt > subtitles.srt
-
-  # 2. Export directly to WebVTT for HTML5 video players
-  termux-stt transcribe samples/jfk_1min.wav --format vtt > subtitles.vtt
-
-  # 3. Export to structured JSON for data pipelines
-  termux-stt transcribe samples/jfk_1min.wav --format json > output.json</code></pre>
-
-  <h3>Recipe 2: Neural Speaker Diarization ("Who Spoke When?")</h3>
-  <p>Run high-precision multi-speaker diarization using PyAnnote 3.0 + CAM++ 192d neural embeddings:</p>
-  <pre><code>termux-stt diarize samples/kor_diarization.wav --speakers 2 --format text</code></pre>
-  <p><strong>Sample Output:</strong></p>
-  <pre><code>[Speaker 0] (0.0s -> 5.2s): 주변에 얘기를 거의 안 했어요. 제가 사실 그 샀다고 얘기를 안 했어요.
-  [Speaker 1] (5.4s -> 6.1s): 왜요?
-  [Speaker 0] (6.5s -> 11.2s): 왜냐하면 그냥 뭐 얘기할 필요성을 잘 못 느껴서...</code></pre>
-
-  <h3>Recipe 3: Real-Time Microphone Streaming</h3>
-  <p>Speak directly into your smartphone microphone with low latency and real-time Silero-VAD silence filtering:</p>
-  <pre><code># CLI real-time listener (Press Ctrl+C to terminate)
-  termux-stt listen --engine whisper --model tiny --lang ko</code></pre>
-
-  <h3>Recipe 4: Programmatic Python SDK Integration</h3>
-  <pre><code>from termux_stt import create_engine
-
-  # 1. Initialize Hybrid Engine
-  engine = create_engine("hybrid", model="small", lang="ko", num_speakers=2)
-
-  # 2. Transcribe and Diarize
-  result = engine.diarize("samples/kor_diarization.wav")
-
-  for seg in result.segments:
-      print(f"[{seg.speaker}] {seg.start:.2f}s - {seg.end:.2f}s: {seg.text}")</code></pre>
-
-  <h3>Recipe 5: Programmatic Node.js / TypeScript API</h3>
-  <pre><code>const { createEngine } = require("termux-stt");
-
-  async function diarizeMeeting() {
-    const engine = createEngine("hybrid", { model: "small", lang: "ko", numSpeakers: 2 });
-    const result = await engine.diarize("samples/kor_diarization.wav");
-    
-    console.log("Speakers:", result.speakers);
-    console.log("SRT Subtitles:\n", result.toSrt());
-  }
-  diarizeMeeting();</code></pre>
-
-api_body: |
-  <h3>1. Top-Level Engine Factory</h3>
-  <table class="data-table">
-    <thead>
-      <tr><th>Function</th><th>Parameters</th><th>Return Type</th><th>Description</th></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><code>create_engine</code></td>
-        <td><code>engine="whisper"|"sherpa"|"hybrid", model=None, lang="ko", threads=None, vad=True, quantization="q5_1", num_speakers=0, **kwargs</code></td>
-        <td><code>Engine</code></td>
-        <td>Instantiates and returns the configured concrete STT or Hybrid engine instance.</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h3>2. Core Engine Methods (<code>Engine</code> Abstract Base)</h3>
-  <table class="data-table">
-    <thead>
-      <tr><th>Method</th><th>Signature</th><th>Return Type</th><th>Description</th></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><code>transcribe</code></td>
-        <td><code>(audio_path: str, **kwargs)</code></td>
-        <td><code>TranscriptResult</code></td>
-        <td>Transcribes audio file with subprocess crash isolation and returns full text with timestamped segments.</td>
-      </tr>
-      <tr>
-        <td><code>diarize</code></td>
-        <td><code>(audio_path: str, num_speakers: int = 2, **kwargs)</code></td>
-        <td><code>DiarizedResult</code></td>
-        <td>Runs the full neural diarization pipeline (PyAnnote 3.0 + CAM++ 192d + TS-VAD + Whisper STT).</td>
-      </tr>
-      <tr>
-        <td><code>stream_mic</code></td>
-        <td><code>(duration: Optional[float] = None)</code></td>
-        <td><code>Iterator[Segment]</code></td>
-        <td>Streams live audio from the device microphone and yields transcribed segments in real time.</td>
-      </tr>
-      <tr>
-        <td><code>stream_file</code></td>
-        <td><code>(audio_path: str, chunk_sec: float = 5.0)</code></td>
-        <td><code>Iterator[Segment]</code></td>
-        <td>Streams audio from a file in chunks and yields transcription segments sequentially.</td>
-      </tr>
-      <tr>
-        <td><code>get_info</code></td>
-        <td><code>()</code></td>
-        <td><code>Dict[str, Any]</code></td>
-        <td>Returns engine status metadata, active model name, language, and hardware thread configuration.</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h3>3. Data Structures & Subtitle Formatters</h3>
-  
-  <h4><code>TranscriptResult</code> Struct:</h4>
-  <ul>
-    <li><code>text: str</code> - Full reconstructed transcription text.</li>
-    <li><code>language: str</code> - Detected or configured ISO 639-1 language code.</li>
-    <li><code>segments: List[Segment]</code> - Timestamped utterance segments.</li>
-    <li><code>duration: float</code> - Total audio duration in seconds.</li>
-    <li><code>to_srt() -> str</code> - Serializes segments into valid SubRip (SRT) format.</li>
-    <li><code>to_vtt() -> str</code> - Serializes segments into WebVTT format.</li>
-    <li><code>to_json() -> str</code> - Serializes transcript and segment offsets into valid JSON.</li>
-    <li><code>to_rttm() -> str</code> - Serializes segments into NIST Rich Transcription (RTTM) format.</li>
-  </ul>
-
-  <h4><code>DiarizedResult</code> Struct:</h4>
-  <ul>
-    <li>Extends <code>TranscriptResult</code>.</li>
-    <li><code>speakers: Optional[List[str]]</code> - Unique list of identified speaker labels (e.g. <code>["Speaker_0", "Speaker_1"]</code>).</li>
-  </ul>
-
-  <h4><code>Segment</code> Struct:</h4>
-  <ul>
-    <li><code>start: float</code> - Start timestamp in seconds (precision: 0.001s).</li>
-    <li><code>end: float</code> - End timestamp in seconds.</li>
-    <li><code>text: str</code> - Transcribed text within the interval.</li>
-    <li><code>speaker: Optional[str]</code> - Assigned speaker identifier (e.g. <code>"Speaker_0"</code>).</li>
-    <li><code>confidence: Optional[float]</code> - Transcription confidence score.</li>
-  </ul>
-
-benchmarks_body: |
-  <div class="alert alert-tip">
-    <span class="alert-title">Hardware Testbed Specifications</span>
-    <p>All benchmarks were conducted on physical hardware testbeds: <strong>Samsung Galaxy A35 (Exynos 1380, 6GB RAM, Android 14 Termux)</strong> and <strong>Samsung Galaxy S21 (Snapdragon 865, 8GB RAM, Android 15 Termux)</strong> using physical Korean podcast and JFK inauguration speech audio.</p>
-  </div>
-
-  <h3>1. Real Korean Podcast 2-Speaker Cross-Talk Benchmark (45.00s Audio)</h3>
-  <table class="data-table">
-    <thead>
-      <tr><th>Hardware Device</th><th>Pipeline Stage</th><th>Algorithm / Model</th><th>Execution Latency</th><th>Accuracy / DER</th><th>Peak RSS</th></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Galaxy A35 (Exynos 1380)</strong></td>
-        <td>Neural Diarization</td>
-        <td>PyAnnote 3.0 ONNX + CAM++ 192d</td>
-        <td><strong>16.91s</strong></td>
-        <td><span class="status-badge active">DER &lt; 8.5% (High Precision)</span></td>
-        <td>142.3 MB</td>
-      </tr>
-      <tr>
-        <td><strong>Galaxy A35 (Exynos 1380)</strong></td>
-        <td>Overlap Resolution</td>
-        <td>TS-VAD Multi-Label Cross-Talk Scanner</td>
-        <td><strong>0.42s</strong></td>
-        <td><span class="status-badge active">"왜요?" Interrupt Decoupled</span></td>
-        <td>18.5 MB</td>
-      </tr>
-      <tr>
-        <td><strong>Galaxy A35 (Exynos 1380)</strong></td>
-        <td>Speech-to-Text</td>
-        <td>Whisper.cpp Small (Korean)</td>
-        <td><strong>34.12s</strong></td>
-        <td><span class="status-badge active">WER &lt; 5.2%</span></td>
-        <td>42.1 MB</td>
-      </tr>
-      <tr style="font-weight: bold; background: var(--bg-card, #f8fafc);">
-        <td colspan="3">Full End-to-End Pipeline</td>
-        <td><strong>51.45s (RTF 1.14x)</strong></td>
-        <td><span class="status-badge active">Production Validated</span></td>
-        <td>158.2 MB</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h3>2. Whisper Model Tier On-Device Performance Matrix (Galaxy S21 / S25)</h3>
-  <table class="data-table">
-    <thead>
-      <tr><th>Hardware Device</th><th>Model Tier</th><th>Parameters</th><th>Model Size</th><th>Inference Time (60s Audio)</th><th>Real-Time Factor (RTF)</th><th>Peak RAM</th><th>WER Status</th></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Galaxy S25 (SD 8 Elite)</strong></td>
-        <td><strong>Whisper Small (Hybrid -sm)</strong></td>
-        <td>244M</td>
-        <td>466 MB</td>
-        <td><strong>12.93s</strong></td>
-        <td><strong>0.2133x (4.7x Faster)</strong></td>
-        <td>48.5 MB</td>
-        <td><span class="status-badge active">PASS (SOTA)</span></td>
-      </tr>
-      <tr>
-        <td><strong>Galaxy S21 (SD865)</strong></td>
-        <td><strong>Whisper Base</strong></td>
-        <td>74M</td>
-        <td>142 MB</td>
-        <td><strong>12.46s</strong></td>
-        <td><strong>0.2077x (5x Faster)</strong></td>
-        <td>25.6 MB</td>
-        <td><span class="status-badge active">PASS</span></td>
-      </tr>
-      <tr>
-        <td><strong>Galaxy A35 (Exynos 1380)</strong></td>
-        <td><strong>Whisper Tiny</strong></td>
-        <td>39M</td>
-        <td>75 MB</td>
-        <td><strong>22.36s</strong></td>
-        <td><strong>0.3726x (2.7x Faster)</strong></td>
-        <td>5.75 MB</td>
-        <td><span class="status-badge active">PASS</span></td>
-      </tr>
-    </tbody>
-  </table>
-
-advanced_parameters_body: |
-  <h3>1. Whisper.cpp GGML Quantization Profiles</h3>
-  <table class="data-table">
-    <thead>
-      <tr><th>Quantization Level</th><th>Memory Overhead</th><th>Relative Speed</th><th>Recommended Use Case</th></tr>
-    </thead>
-    <tbody>
-      <tr><td><code>f16</code></td><td>100% (Baseline)</td><td>1.0x</td><td>Reference accuracy on desktop and high-end ARM nodes.</td></tr>
-      <tr><td><code>q8_0</code></td><td>55%</td><td>1.3x</td><td>Near-lossless precision with reduced RAM consumption.</td></tr>
-      <tr><td><code>q5_1</code> / <code>q5_0</code></td><td>35%</td><td>1.8x</td><td><strong>Optimal mobile default:</strong> High accuracy within minimal RAM.</td></tr>
-      <tr><td><code>q4_0</code></td><td>28%</td><td>2.2x</td><td>Extreme memory constraints (devices with &lt;2GB total RAM).</td></tr>
-    </tbody>
-  </table>
-
-  <h3>2. Advanced Decoding & Search Parameters</h3>
-  <table class="data-table">
-    <thead>
-      <tr><th>CLI Flag</th><th>SDK Key</th><th>Default</th><th>Description</th></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><code>--beam-size &lt;N&gt;</code></td>
-        <td><code>beam_size</code></td>
-        <td><code>1</code></td>
-        <td>Expands beam search width for complex audio with overlapping speakers.</td>
-      </tr>
-      <tr>
-        <td><code>--temperature &lt;T&gt;</code></td>
-        <td><code>temperature</code></td>
-        <td><code>0.0</code></td>
-        <td>Sampling temperature. <code>0.0</code> enables deterministic greedy search.</td>
-      </tr>
-      <tr>
-        <td><code>--prompt &lt;TEXT&gt;</code></td>
-        <td><code>prompt</code></td>
-        <td><code>None</code></td>
-        <td>Provides vocabulary context hints (acronyms, domain terms, speaker names).</td>
-      </tr>
-      <tr>
-        <td><code>--translate</code> / <code>-tr</code></td>
-        <td><code>translate</code></td>
-        <td><code>False</code></td>
-        <td>Translates multilingual foreign speech directly into English text.</td>
-      </tr>
-    </tbody>
-  </table>
-
+- category: Asymmetric Hybrid Pipeline
+  operations: Vulkan GPU Audio Encoder + ARM NEON CPU Sequential Decoder (--split-mode / --optimize-1)
+  status: Production
+- category: Speech Recognition (STT)
+  operations: Whisper.cpp (tiny/base/small/medium/large-v3-turbo), Sherpa-ONNX (SenseVoice)
+  status: Production
+- category: Speaker Diarization
+  operations: PyAnnote 3.0 ONNX, 3D-Speaker CAM++ 192d, TS-VAD OverlapResolver, Cosine K-Means
+  status: Production
+- category: Audio Preprocessing
+  operations: Zero-Subprocess Wave Parser, FFmpeg Auto-Fallback, Silero-VAD Silence Filter
+  status: Production
+- category: Subtitle & Data Formats
+  operations: SubRip (SRT), WebVTT (VTT), NIST Rich Transcription (RTTM), Structured JSON
+  status: Production
+- category: Platform Runtimes
+  operations: Android Termux (Bionic ARM64/aarch64), Python 3.8~3.13, Node.js 16~22
+  status: Production
+code_example_py: "from termux_stt import create_engine\n\n# 1. Initialize Whisper Engine with Vulkan GPU / CPU Hybrid Acceleration\nengine = create_engine(\"whisper\", model=\"small\", lang=\"ko\", threads=4, split_mode=True)\n\n# 2. Transcribe Audio directly into Subtitles\nresult = engine.transcribe(\"samples/jfk_1min.wav\")\nprint(\"Transcript:\\n\", result.text)\nprint(\"SRT Subtitles:\\n\", result.to_srt())\n\n# 3. Multi-Speaker Neural Diarization (PyAnnote 3.0 + CAM++ 192d + TS-VAD)\nhybrid = create_engine(\"hybrid\", lang=\"ko\", num_speakers=2)\ndiar_result = hybrid.diarize(\"samples/kor_diarization.wav\")\nfor seg in diar_result.segments:\n    print(f\"[{seg.speaker}] ({seg.start:.1f}s -> {seg.end:.1f}s): {seg.text}\")\n"
+code_example_js: "const { createEngine } = require(\"termux-stt\");\n\nasync function main() {\n  // 1. Initialize Whisper Engine\n  const engine = createEngine(\"whisper\", { model: \"tiny\", lang: \"ko\", threads: 4 });\n\n  // 2. Transcribe Audio\n  const result = await engine.transcribe(\"samples/jfk_1min.wav\");\n  console.log(\"Transcript:\", result.text);\n  console.log(\"SRT Subtitles:\\n\", result.toSrt());\n\n  // 3. Neural Diarization via Hybrid Engine\n  const hybrid = createEngine(\"hybrid\", { lang: \"ko\", numSpeakers: 2 });\n  const diarResult = await hybrid.diarize(\"samples/kor_diarization.wav\");\n  for (const seg of diarResult.segments) {\n    console.log(`[${seg.speaker}] (${seg.start.toFixed(1)}s -> ${seg.end.toFixed(1)}s): ${seg.text}`);\n  }\n}\nmain();\n"
+installation_body: "<div class=\"alert alert-tip\">\n  <span class=\"alert-title\">Target-Aware Automated Installation</span>\n  <p><code>termux-stt</code> provisions native ARM64 Whisper binaries and system dependencies out-of-the-box. Neural speaker diarization models can be installed selectively to preserve mobile storage.</p>\n</div>\n\n<h3>1. Automated Package Installation</h3>\n\n<h4>Python Edition (PyPI):</h4>\n<pre><code># 1. Install official PyPI package\npip install --upgrade termux-stt\n\n# 2. Standard lightweight setup (Whisper STT + FFmpeg)\ntermux-stt install\n\n# 3. Optional: Full Neural Diarization Provisioning (PyAnnote + CAM++ 192d)\ntermux-stt install --engine diarization\n# Or full setup in one command:\ntermux-stt install --all</code></pre>\n\n<h4>Node.js / TypeScript Edition (npm):</h4>\n<pre><code># 1. Install official global npm package\nnpm install -g termux-stt\n\n# 2. Standard setup\ntermux-stt install\n\n# 3. Full installation\ntermux-stt install --all</code></pre>\n\
+  \n<h3>2. Interactive Auto-Provisioning</h3>\n<p>If you run diarization without having installed the neural models, the CLI automatically detects the missing components in interactive terminal sessions and prompts: <code>[?] Neural Diarization models are missing. Download now? [y/N]:</code>.</p>\n\n<h3>3. Android Termux Prerequisites & System Dependencies</h3>\n<p>If you are provisioning a clean Android Termux environment from scratch, execute the following system package installations:</p>\n<pre><code># Update Termux repository index and install native toolchain\npkg update -y && pkg install -y \\\n  python \\\n  nodejs-lts \\\n  ffmpeg \\\n  libbluray \\\n  libxml2 \\\n  cmake \\\n  make \\\n  clang \\\n  git \\\n  termux-api</code></pre>\n\n<h3>4. Self-Healing Diagnostic Health Check</h3>\n<p>Verify that your system environment, audio linkers, and ARM NEON binaries are fully functional:</p>\n<pre><code>termux-stt doctor</code></pre>\n"
+quickstart_body: "<div class=\"alert alert-tip\">\n  <span class=\"alert-title\">Included Sample Audio Benchmark Suite</span>\n  <p><code>termux-stt</code> packages benchmark audio samples in <code>samples/</code>:</p>\n  <ul>\n    <li><code>samples/jfk_1min.wav</code>: English Speech Benchmark (60.00s, 16kHz Mono)</li>\n    <li><code>samples/kor_diarization.wav</code>: Korean Real Podcast 2-Speaker Cross-Talk Benchmark (45.00s, 16kHz Mono)</li>\n    <li><code>samples/3_speaker_test.wav</code>: 3-Speaker Multi-Conversation Benchmark (15.00s, 16kHz Mono)</li>\n  </ul>\n</div>\n\n<h3>Recipe 1: 1-Line Subtitle Transcription (SRT / WebVTT / JSON)</h3>\n<pre><code># 1. Transcribe audio and export to synchronized SRT subtitles\ntermux-stt transcribe samples/jfk_1min.wav --format srt > subtitles.srt\n\n# 2. Export directly to WebVTT for HTML5 video players\ntermux-stt transcribe samples/jfk_1min.wav --format vtt > subtitles.vtt\n\n# 3. Export to structured JSON for data pipelines\ntermux-stt transcribe\
+  \ samples/jfk_1min.wav --format json > output.json</code></pre>\n\n<h3>Recipe 2: Neural Speaker Diarization (\"Who Spoke When?\")</h3>\n<p>Run high-precision multi-speaker diarization using PyAnnote 3.0 + CAM++ 192d neural embeddings:</p>\n<pre><code>termux-stt diarize samples/kor_diarization.wav --speakers 2 --format text</code></pre>\n<p><strong>Sample Output:</strong></p>\n<pre><code>[Speaker 0] (0.0s -> 5.2s): 주변에 얘기를 거의 안 했어요. 제가 사실 그 샀다고 얘기를 안 했어요.\n[Speaker 1] (5.4s -> 6.1s): 왜요?\n[Speaker 0] (6.5s -> 11.2s): 왜냐하면 그냥 뭐 얘기할 필요성을 잘 못 느껴서...</code></pre>\n\n<h3>Recipe 3: Real-Time Microphone Streaming</h3>\n<p>Speak directly into your smartphone microphone with low latency and real-time Silero-VAD silence filtering:</p>\n<pre><code># CLI real-time listener (Press Ctrl+C to terminate)\ntermux-stt listen --engine whisper --model tiny --lang ko</code></pre>\n\n<h3>Recipe 4: Programmatic Python SDK Integration</h3>\n<pre><code>from termux_stt import create_engine\n\n# 1. Initialize Hybrid\
+  \ Engine\nengine = create_engine(\"hybrid\", model=\"small\", lang=\"ko\", num_speakers=2)\n\n# 2. Transcribe and Diarize\nresult = engine.diarize(\"samples/kor_diarization.wav\")\n\nfor seg in result.segments:\n    print(f\"[{seg.speaker}] {seg.start:.2f}s - {seg.end:.2f}s: {seg.text}\")</code></pre>\n\n<h3>Recipe 5: Programmatic Node.js / TypeScript API</h3>\n<pre><code>const { createEngine } = require(\"termux-stt\");\n\nasync function diarizeMeeting() {\n  const engine = createEngine(\"hybrid\", { model: \"small\", lang: \"ko\", numSpeakers: 2 });\n  const result = await engine.diarize(\"samples/kor_diarization.wav\");\n  \n  console.log(\"Speakers:\", result.speakers);\n  console.log(\"SRT Subtitles:\\n\", result.toSrt());\n}\ndiarizeMeeting();</code></pre>\n"
+api_body: "<h3>1. Top-Level Engine Factory</h3>\n<table class=\"data-table\">\n  <thead>\n    <tr><th>Function</th><th>Parameters</th><th>Return Type</th><th>Description</th></tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td><code>create_engine</code></td>\n      <td><code>engine=\"whisper\"|\"sherpa\"|\"hybrid\", model=None, lang=\"ko\", threads=None, vad=True, quantization=\"q5_1\", num_speakers=0, **kwargs</code></td>\n      <td><code>Engine</code></td>\n      <td>Instantiates and returns the configured concrete STT or Hybrid engine instance.</td>\n    </tr>\n  </tbody>\n</table>\n\n<h3>2. Core Engine Methods (<code>Engine</code> Abstract Base)</h3>\n<table class=\"data-table\">\n  <thead>\n    <tr><th>Method</th><th>Signature</th><th>Return Type</th><th>Description</th></tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td><code>transcribe</code></td>\n      <td><code>(audio_path: str, **kwargs)</code></td>\n      <td><code>TranscriptResult</code></td>\n      <td>Transcribes audio file with\
+  \ subprocess crash isolation and returns full text with timestamped segments.</td>\n    </tr>\n    <tr>\n      <td><code>diarize</code></td>\n      <td><code>(audio_path: str, num_speakers: int = 2, **kwargs)</code></td>\n      <td><code>DiarizedResult</code></td>\n      <td>Runs the full neural diarization pipeline (PyAnnote 3.0 + CAM++ 192d + TS-VAD + Whisper STT).</td>\n    </tr>\n    <tr>\n      <td><code>stream_mic</code></td>\n      <td><code>(duration: Optional[float] = None)</code></td>\n      <td><code>Iterator[Segment]</code></td>\n      <td>Streams live audio from the device microphone and yields transcribed segments in real time.</td>\n    </tr>\n    <tr>\n      <td><code>stream_file</code></td>\n      <td><code>(audio_path: str, chunk_sec: float = 5.0)</code></td>\n      <td><code>Iterator[Segment]</code></td>\n      <td>Streams audio from a file in chunks and yields transcription segments sequentially.</td>\n    </tr>\n    <tr>\n      <td><code>get_info</code></td>\n    \
+  \  <td><code>()</code></td>\n      <td><code>Dict[str, Any]</code></td>\n      <td>Returns engine status metadata, active model name, language, and hardware thread configuration.</td>\n    </tr>\n  </tbody>\n</table>\n\n<h3>3. Data Structures & Subtitle Formatters</h3>\n\n<h4><code>TranscriptResult</code> Struct:</h4>\n<ul>\n  <li><code>text: str</code> - Full reconstructed transcription text.</li>\n  <li><code>language: str</code> - Detected or configured ISO 639-1 language code.</li>\n  <li><code>segments: List[Segment]</code> - Timestamped utterance segments.</li>\n  <li><code>duration: float</code> - Total audio duration in seconds.</li>\n  <li><code>to_srt() -> str</code> - Serializes segments into valid SubRip (SRT) format.</li>\n  <li><code>to_vtt() -> str</code> - Serializes segments into WebVTT format.</li>\n  <li><code>to_json() -> str</code> - Serializes transcript and segment offsets into valid JSON.</li>\n  <li><code>to_rttm() -> str</code> - Serializes segments into NIST\
+  \ Rich Transcription (RTTM) format.</li>\n</ul>\n\n<h4><code>DiarizedResult</code> Struct:</h4>\n<ul>\n  <li>Extends <code>TranscriptResult</code>.</li>\n  <li><code>speakers: Optional[List[str]]</code> - Unique list of identified speaker labels (e.g. <code>[\"Speaker_0\", \"Speaker_1\"]</code>).</li>\n</ul>\n\n<h4><code>Segment</code> Struct:</h4>\n<ul>\n  <li><code>start: float</code> - Start timestamp in seconds (precision: 0.001s).</li>\n  <li><code>end: float</code> - End timestamp in seconds.</li>\n  <li><code>text: str</code> - Transcribed text within the interval.</li>\n  <li><code>speaker: Optional[str]</code> - Assigned speaker identifier (e.g. <code>\"Speaker_0\"</code>).</li>\n  <li><code>confidence: Optional[float]</code> - Transcription confidence score.</li>\n</ul>\n"
+benchmarks_body: "<div class=\"alert alert-tip\">\n  <span class=\"alert-title\">Hardware Testbed Specifications</span>\n  <p>All benchmarks were conducted on physical hardware testbeds: <strong>Samsung Galaxy A35 (Exynos 1380, 6GB RAM, Android 14 Termux)</strong> and <strong>Samsung Galaxy S21 (Snapdragon 865, 8GB RAM, Android 15 Termux)</strong> using physical Korean podcast and JFK inauguration speech audio.</p>\n</div>\n\n<h3>1. Real Korean Podcast 2-Speaker Cross-Talk Benchmark (45.00s Audio)</h3>\n<table class=\"data-table\">\n  <thead>\n    <tr><th>Hardware Device</th><th>Pipeline Stage</th><th>Algorithm / Model</th><th>Execution Latency</th><th>Accuracy / DER</th><th>Peak RSS</th></tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td><strong>Galaxy A35 (Exynos 1380)</strong></td>\n      <td>Neural Diarization</td>\n      <td>PyAnnote 3.0 ONNX + CAM++ 192d</td>\n      <td><strong>16.91s</strong></td>\n      <td><span class=\"status-badge active\">DER &lt; 8.5% (High Precision)</span></td>\n\
+  \      <td>142.3 MB</td>\n    </tr>\n    <tr>\n      <td><strong>Galaxy A35 (Exynos 1380)</strong></td>\n      <td>Overlap Resolution</td>\n      <td>TS-VAD Multi-Label Cross-Talk Scanner</td>\n      <td><strong>0.42s</strong></td>\n      <td><span class=\"status-badge active\">\"왜요?\" Interrupt Decoupled</span></td>\n      <td>18.5 MB</td>\n    </tr>\n    <tr>\n      <td><strong>Galaxy A35 (Exynos 1380)</strong></td>\n      <td>Speech-to-Text</td>\n      <td>Whisper.cpp Small (Korean)</td>\n      <td><strong>34.12s</strong></td>\n      <td><span class=\"status-badge active\">WER &lt; 5.2%</span></td>\n      <td>42.1 MB</td>\n    </tr>\n    <tr style=\"font-weight: bold; background: var(--bg-card, #f8fafc);\">\n      <td colspan=\"3\">Full End-to-End Pipeline</td>\n      <td><strong>51.45s (RTF 1.14x)</strong></td>\n      <td><span class=\"status-badge active\">Production Validated</span></td>\n      <td>158.2 MB</td>\n    </tr>\n  </tbody>\n</table>\n\n<h3>2. Whisper Model Tier On-Device\
+  \ Performance Matrix (Galaxy S21 / S25)</h3>\n<table class=\"data-table\">\n  <thead>\n    <tr><th>Hardware Device</th><th>Model Tier</th><th>Parameters</th><th>Model Size</th><th>Inference Time (60s Audio)</th><th>Real-Time Factor (RTF)</th><th>Peak RAM</th><th>WER Status</th></tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td><strong>Galaxy S25 (SD 8 Elite)</strong></td>\n      <td><strong>Whisper Small (Hybrid -sm)</strong></td>\n      <td>244M</td>\n      <td>466 MB</td>\n      <td><strong>12.93s</strong></td>\n      <td><strong>0.2133x (4.7x Faster)</strong></td>\n      <td>48.5 MB</td>\n      <td><span class=\"status-badge active\">PASS (SOTA)</span></td>\n    </tr>\n    <tr>\n      <td><strong>Galaxy S21 (SD865)</strong></td>\n      <td><strong>Whisper Base</strong></td>\n      <td>74M</td>\n      <td>142 MB</td>\n      <td><strong>12.46s</strong></td>\n      <td><strong>0.2077x (5x Faster)</strong></td>\n      <td>25.6 MB</td>\n      <td><span class=\"status-badge active\">PASS</span></td>\n\
+  \    </tr>\n    <tr>\n      <td><strong>Galaxy A35 (Exynos 1380)</strong></td>\n      <td><strong>Whisper Tiny</strong></td>\n      <td>39M</td>\n      <td>75 MB</td>\n      <td><strong>22.36s</strong></td>\n      <td><strong>0.3726x (2.7x Faster)</strong></td>\n      <td>5.75 MB</td>\n      <td><span class=\"status-badge active\">PASS</span></td>\n    </tr>\n  </tbody>\n</table>\n"
+advanced_parameters_body: "<h3>1. Whisper.cpp GGML Quantization Profiles</h3>\n<table class=\"data-table\">\n  <thead>\n    <tr><th>Quantization Level</th><th>Memory Overhead</th><th>Relative Speed</th><th>Recommended Use Case</th></tr>\n  </thead>\n  <tbody>\n    <tr><td><code>f16</code></td><td>100% (Baseline)</td><td>1.0x</td><td>Reference accuracy on desktop and high-end ARM nodes.</td></tr>\n    <tr><td><code>q8_0</code></td><td>55%</td><td>1.3x</td><td>Near-lossless precision with reduced RAM consumption.</td></tr>\n    <tr><td><code>q5_1</code> / <code>q5_0</code></td><td>35%</td><td>1.8x</td><td><strong>Optimal mobile default:</strong> High accuracy within minimal RAM.</td></tr>\n    <tr><td><code>q4_0</code></td><td>28%</td><td>2.2x</td><td>Extreme memory constraints (devices with &lt;2GB total RAM).</td></tr>\n  </tbody>\n</table>\n\n<h3>2. Advanced Decoding & Search Parameters</h3>\n<table class=\"data-table\">\n  <thead>\n    <tr><th>CLI Flag</th><th>SDK Key</th><th>Default</th><th>Description</th></tr>\n\
+  \  </thead>\n  <tbody>\n    <tr>\n      <td><code>--beam-size &lt;N&gt;</code></td>\n      <td><code>beam_size</code></td>\n      <td><code>1</code></td>\n      <td>Expands beam search width for complex audio with overlapping speakers.</td>\n    </tr>\n    <tr>\n      <td><code>--temperature &lt;T&gt;</code></td>\n      <td><code>temperature</code></td>\n      <td><code>0.0</code></td>\n      <td>Sampling temperature. <code>0.0</code> enables deterministic greedy search.</td>\n    </tr>\n    <tr>\n      <td><code>--prompt &lt;TEXT&gt;</code></td>\n      <td><code>prompt</code></td>\n      <td><code>None</code></td>\n      <td>Provides vocabulary context hints (acronyms, domain terms, speaker names).</td>\n    </tr>\n    <tr>\n      <td><code>--translate</code> / <code>-tr</code></td>\n      <td><code>translate</code></td>\n      <td><code>False</code></td>\n      <td>Translates multilingual foreign speech directly into English text.</td>\n    </tr>\n  </tbody>\n</table>\n"
 changelog:
-  - version: "v2.0.2"
-    date: "2026-10-06"
-    title: "Vulkan GPU Acceleration & Explicit OpenCL Declaration Protocol (SCRUM-512)"
-    type: "Production Release (Latest)"
-    changes:
-      - "Vulkan GPU Default & Explicit OpenCL Protocol: Enforced Vulkan GPU priority for mobile neural inference, routing to OpenCL exclusively when explicitly declared via --device opencl with zero silent fallback."
-      - "Diarization Multi-Thread Optimization: Injected dynamic multi-threading (--embedding.num-threads=4, --segmentation.num-threads=4) eliminating single-core bottlenecks and slashing latency from 109s to 64s (41% reduction)."
-      - "Hybrid Engine GPU Acceleration: Propagated device and threads parameters directly into WhisperEngine and SherpaDiarizer."
-      - "Full Monorepo SemVer Parity: Synchronized version 2.0.2 across pyproject.toml, package.json, doc.config.yaml, and SDK manifests."
-  - version: "v2.0.1"
-    date: "2026-10-06"
-    title: "Timestamp Interval Display, Benchmark Normalization & Hot-Reload Validation (SCRUM-512)"
-    type: "Production Release"
-    changes:
-      - "Timestamp Interval Display: Added format_timestamp formatting to output [Speaker_X] [MM:SS.ss -> MM:SS.ss] for all diarization CLI and transcript exports."
-      - "Benchmark Sample Normalization: Standardized official Korean podcast sample to samples/kor_diarization.wav (45.00s 16kHz Mono PCM)."
-      - "Real-Device 2-vs-3 Speaker & Hot-Reload Benchmark: Validated Galaxy A35 (Exynos 1380) with 2.48s hot-reload acceleration and precise cross-talk decoupling."
-      - "Version Alignment: Bumped version across pyproject.toml, package.json, doc.config.yaml, and SDK manifests to 2.0.1."
-  - version: "v2.0.0"
-    date: "2026-10-06"
-    title: "Major Upgrade: Next-Gen Neural Diarization & Vosk Deprecation (SCRUM-512)"
-    type: "Major Release"
-    changes:
-      - "Complete Vosk Legacy Deprecation: Fully purged legacy Vosk Kaldi bindings, xvector engine, and outdated dependencies from Python SDK, Node.js, CLI, and installer."
-      - "PyAnnote 3.0 & 3D-Speaker CAM++ 192d Integration: Integrated SOTA neural speaker segmentation and Alibaba 3D-Speaker CAM++ 192-dimensional d-vector embeddings."
-      - "TS-VAD Overlap Speech Resolution: Built OverlapResolver module to resolve simultaneous cross-talk and overlapping speech interruptions ('왜요?' backchannels) into clean multi-speaker streams."
-      - "Target-Aware Lightweight Provisioning: Default installer keeps base whisper STT lightweight, with neural diarization provisioned via 'termux-stt install --engine diarization' or interactive TTY [y/N] prompts."
-      - "Benchmark Sample Suite Expansion: Added real Korean podcast 2-speaker cross-talk benchmark ('samples/kor_diarization.wav') and 3-speaker benchmark ('samples/3_speaker_test.wav')."
-      - "Full Monorepo SemVer Parity: Synchronized version 2.0.0 across pyproject.toml, package.json, doc.config.yaml, and SDK manifests."
-  - version: "v1.3.2"
-    date: "2026-09-29"
-    title: "SmartRouter Capability Filtering & CLI Flag De-Duplication"
-    type: "Production Release"
-    changes:
-      - "SmartRouter Dynamic Split-Mode Filtering: Automatically strips -sm flag when the native binary does not declare split mode support in its help output, eliminating unknown option aborts."
-      - "Thread Flag -t De-Duplication: Enforces single authoritative -t parameter passed to whisper-cli, eliminating duplicate argument conflicts."
-      - "Conditional Vulkan Request Logic: Restricts requested_backend='vulkan' strictly to explicit GPU/Vulkan target execution, ensuring pure CPU execution when --device cpu is selected."
-      - "Upstream HF Model Registry Alignment: Synchronized SHA-256 checksums and model endpoints for Whisper quantized GGML models in registry.py."
-  - version: "v1.3.1"
-    date: "2026-09-29"
-    title: "Asymmetric Mobile SoC Hybrid Pipeline (Encoder Vulkan GPU / Decoder CPU SIMD)"
-    type: "Stable Release"
-    changes:
-      - "Asymmetric Hardware Hybrid Pipeline: Offloads dense audio encoder GEMMs to mobile Vulkan GPUs while retaining sequential single-token autoregressive decoding on host CPU ARM NEON SIMD vector units."
-      - "Zero-Copy Cross-Attention DMA Transfer: Automatically syncs calculated KV projections across isolated GGML schedulers via wstate.kv_cross_cpu."
-      - "High-Performance Verification: Achieves 12.93s wall-clock latency on Whisper Small (Galaxy S25, 21.0% faster than Pure GPU, 16.5% faster than Pure CPU)."
-      - "Dynamic CLI Controls: Added --split-mode (-sm, --hybrid), --optimize-1, and Fail-Fast non-GPU validation."
-  - version: "v1.3.0"
-    date: "2026-09-28"
-    title: "Bionic Zero-Collision Rule & Dual-Flagship Native Vulkan Acceleration"
-    type: "Stable Release"
-    changes:
-      - "Bionic Linker Zero-Collision Rule: Dynamically purges $PREFIX/lib from LD_LIBRARY_PATH during whisper-cli execution."
-      - "Dual-Flagship Native Vulkan GPU Universal Acceleration: Validated native Vulkan GPU compute offload across Qualcomm Adreno 830 and ARM Mali-G78."
-      - "Subprocess ABI Isolation: Standardized RPATH dynamic resolution guaranteeing standalone execution integrity."
+- version: v2.1.0
+  date: '2026-10-13'
+  title: Neural Multi-Speaker Diarization & Concurrent GPU/CPU Pipeline
+  type: Production Release (Latest)
+  summary_ko: Vosk 완전 퇴출 및 차세대 신경망 화자 분리(PyAnnote 3.0 + CAM++ 192d + TS-VAD 동시발화 분리) 탑재, Whisper GPU와 Sherpa 화자분리기 동시 병렬 파이프라인으로 화자 분리 속도 4배 향상, Apache-2.0 라이선스 표준화.
+  summary_en: Replaced legacy Vosk with neural speaker diarization (PyAnnote 3.0 + CAM++ 192d + TS-VAD overlap resolver), introduced concurrent Whisper GPU and Sherpa CPU dual-pipeline for 4x speedup, and standardized on Apache-2.0.
+  changes:
+  - Deployed Neural Multi-Speaker Diarization using PyAnnote 3.0 segmentation and 3D-Speaker CAM++ 192d embeddings.
+  - Implemented TS-VAD multi-label overlap resolver for simultaneous speech separation.
+  - Engineered Concurrent Dual-Pipeline (Whisper Vulkan GPU || Sherpa Diarizer CPU) achieving 4x diarization speedup.
+  - Deprecated and removed legacy Vosk statistical engine.
+  - Standardized package licensing under Apache-2.0 with OpenSSF SPDX headers.
+- version: v2.0.2
+  date: '2026-10-06'
+  title: Vulkan GPU Acceleration & Explicit OpenCL Declaration Protocol (SCRUM-512)
+  type: Historical Release
+  changes:
+  - 'Vulkan GPU Default & Explicit OpenCL Protocol: Enforced Vulkan GPU priority for mobile neural inference, routing to OpenCL exclusively when explicitly declared via --device opencl with zero silent fallback.'
+  - 'Diarization Multi-Thread Optimization: Injected dynamic multi-threading (--embedding.num-threads=4, --segmentation.num-threads=4) eliminating single-core bottlenecks and slashing latency from 109s to 64s (41% reduction).'
+  - 'Hybrid Engine GPU Acceleration: Propagated device and threads parameters directly into WhisperEngine and SherpaDiarizer.'
+  - 'Full Monorepo SemVer Parity: Synchronized version 2.0.2 across pyproject.toml, package.json, doc.config.yaml, and SDK manifests.'
+- version: v2.0.1
+  date: '2026-10-06'
+  title: Timestamp Interval Display, Benchmark Normalization & Hot-Reload Validation (SCRUM-512)
+  type: Production Release
+  changes:
+  - 'Timestamp Interval Display: Added format_timestamp formatting to output [Speaker_X] [MM:SS.ss -> MM:SS.ss] for all diarization CLI and transcript exports.'
+  - 'Benchmark Sample Normalization: Standardized official Korean podcast sample to samples/kor_diarization.wav (45.00s 16kHz Mono PCM).'
+  - 'Real-Device 2-vs-3 Speaker & Hot-Reload Benchmark: Validated Galaxy A35 (Exynos 1380) with 2.48s hot-reload acceleration and precise cross-talk decoupling.'
+  - 'Version Alignment: Bumped version across pyproject.toml, package.json, doc.config.yaml, and SDK manifests to 2.0.1.'
+- version: v2.0.0
+  date: '2026-10-06'
+  title: 'Major Upgrade: Next-Gen Neural Diarization & Vosk Deprecation (SCRUM-512)'
+  type: Major Release
+  changes:
+  - 'Complete Vosk Legacy Deprecation: Fully purged legacy Vosk Kaldi bindings, xvector engine, and outdated dependencies from Python SDK, Node.js, CLI, and installer.'
+  - 'PyAnnote 3.0 & 3D-Speaker CAM++ 192d Integration: Integrated SOTA neural speaker segmentation and Alibaba 3D-Speaker CAM++ 192-dimensional d-vector embeddings.'
+  - 'TS-VAD Overlap Speech Resolution: Built OverlapResolver module to resolve simultaneous cross-talk and overlapping speech interruptions (''왜요?'' backchannels) into clean multi-speaker streams.'
+  - 'Target-Aware Lightweight Provisioning: Default installer keeps base whisper STT lightweight, with neural diarization provisioned via ''termux-stt install --engine diarization'' or interactive TTY [y/N] prompts.'
+  - 'Benchmark Sample Suite Expansion: Added real Korean podcast 2-speaker cross-talk benchmark (''samples/kor_diarization.wav'') and 3-speaker benchmark (''samples/3_speaker_test.wav'').'
+  - 'Full Monorepo SemVer Parity: Synchronized version 2.0.0 across pyproject.toml, package.json, doc.config.yaml, and SDK manifests.'
+- version: v1.3.2
+  date: '2026-09-29'
+  title: SmartRouter Capability Filtering & CLI Flag De-Duplication
+  type: Production Release
+  changes:
+  - 'SmartRouter Dynamic Split-Mode Filtering: Automatically strips -sm flag when the native binary does not declare split mode support in its help output, eliminating unknown option aborts.'
+  - 'Thread Flag -t De-Duplication: Enforces single authoritative -t parameter passed to whisper-cli, eliminating duplicate argument conflicts.'
+  - 'Conditional Vulkan Request Logic: Restricts requested_backend=''vulkan'' strictly to explicit GPU/Vulkan target execution, ensuring pure CPU execution when --device cpu is selected.'
+  - 'Upstream HF Model Registry Alignment: Synchronized SHA-256 checksums and model endpoints for Whisper quantized GGML models in registry.py.'
+- version: v1.3.1
+  date: '2026-09-29'
+  title: Asymmetric Mobile SoC Hybrid Pipeline (Encoder Vulkan GPU / Decoder CPU SIMD)
+  type: Stable Release
+  changes:
+  - 'Asymmetric Hardware Hybrid Pipeline: Offloads dense audio encoder GEMMs to mobile Vulkan GPUs while retaining sequential single-token autoregressive decoding on host CPU ARM NEON SIMD vector units.'
+  - 'Zero-Copy Cross-Attention DMA Transfer: Automatically syncs calculated KV projections across isolated GGML schedulers via wstate.kv_cross_cpu.'
+  - 'High-Performance Verification: Achieves 12.93s wall-clock latency on Whisper Small (Galaxy S25, 21.0% faster than Pure GPU, 16.5% faster than Pure CPU).'
+  - 'Dynamic CLI Controls: Added --split-mode (-sm, --hybrid), --optimize-1, and Fail-Fast non-GPU validation.'
+- version: v1.3.0
+  date: '2026-09-28'
+  title: Bionic Zero-Collision Rule & Dual-Flagship Native Vulkan Acceleration
+  type: Stable Release
+  changes:
+  - 'Bionic Linker Zero-Collision Rule: Dynamically purges $PREFIX/lib from LD_LIBRARY_PATH during whisper-cli execution.'
+  - 'Dual-Flagship Native Vulkan GPU Universal Acceleration: Validated native Vulkan GPU compute offload across Qualcomm Adreno 830 and ARM Mali-G78.'
+  - 'Subprocess ABI Isolation: Standardized RPATH dynamic resolution guaranteeing standalone execution integrity.'
