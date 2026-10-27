@@ -5,8 +5,8 @@
   "main": "index.js",
   "types": "index.d.ts",
   "bin": {
-    "termux-stt": "bin/cli.js",
-    "termux-stt-install": "bin/termux-stt.js"
+    "amv-stt": "bin/cli.js",
+    "amv-stt-install": "bin/amv-stt.js"
   },
   "files": [
     "index.js",
@@ -18,7 +18,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/uno-km/termux-stt.git"
+    "url": "git+https://github.com/uno-km/amv-stt.git"
   },
   "keywords": [
     "termux",
@@ -60,10 +60,10 @@
     "pulseaudio",
     "offline-speech",
     "privacy-first",
-    "termux-aichain",
-    "termux-tts",
-    "termux-llamacpp",
-    "termux-diffusion",
+    "amv-aichain",
+    "amv-tts",
+    "amv-llamacpp",
+    "amv-diffusion",
     "ameva-runtime",
     "ggml",
     "quantization",
@@ -74,7 +74,7 @@
   "author": "uno-km (AMEVA Foundation) <dev@ameva.org>",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/uno-km/termux-stt/issues"
+    "url": "https://github.com/uno-km/amv-stt/issues"
   },
   "homepage": "https://uno-km.vercel.app/lib/stt/",
   "dependencies": {

@@ -49,10 +49,10 @@ keywords = [
   "pulseaudio",
   "offline-speech",
   "privacy-first",
-  "termux-aichain",
-  "termux-tts",
-  "termux-llamacpp",
-  "termux-diffusion",
+  "amv-aichain",
+  "amv-tts",
+  "amv-llamacpp",
+  "amv-diffusion",
   "ameva-runtime",
   "ggml",
   "quantization",
@@ -71,18 +71,18 @@ gpu = ["ameva-runtime>=2.0.0"]
 dev = ["pytest", "ruff", "mypy"]
 
 [project.scripts]
-termux-stt = "termux_stt.cli.main:main"
-termux-stt-install = "termux_stt.platform.installer:main"
+amv-stt = "termux_stt.cli.main:main"
+amv-stt-install = "termux_stt.platform.installer:main"
 
 [project.entry-points."ameva.components"]
-termux-stt = "termux_stt.adapter:create_adapter"
+amv-stt = "termux_stt.adapter:create_adapter"
 
 
 [project.urls]
 Homepage = "https://uno-km.vercel.app/lib/stt/"
 Documentation = "https://uno-km.vercel.app/lib/stt/"
-Repository = "https://github.com/uno-km/termux-stt"
-Issues = "https://github.com/uno-km/termux-stt/issues"
+Repository = "https://github.com/uno-km/amv-stt"
+Issues = "https://github.com/uno-km/amv-stt/issues"
 
 [tool.ruff]
 line-length = 120
