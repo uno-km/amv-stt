@@ -1,10 +1,14 @@
-# Termux-STT
+# AMV-STT
 
-[![PyPI](https://img.shields.io/pypi/v/termux-stt.svg?style=flat-square&color=0369a1)](https://pypi.org/project/termux-stt/)
-[![Python](https://img.shields.io/pypi/pyversions/termux-stt.svg?style=flat-square)](https://pypi.org/project/termux-stt/)
-[![npm](https://img.shields.io/npm/v/termux-stt.svg?style=flat-square&color=b91c1c)](https://www.npmjs.com/package/termux-stt)
-[![npm downloads](https://img.shields.io/npm/dm/termux-stt.svg?style=flat-square&color=b91c1c)](https://www.npmjs.com/package/termux-stt)
-[![License](https://img.shields.io/badge/License-Apache_2.0-004499.svg?style=flat-square)](https://github.com/uno-km/termux-stt)
+> **마이그레이션 안내**: 이 패키지는 `termux-stt`에서 `amv-stt`로 이름이 바뀌었습니다. 기존 `termux-stt` 배포본(PyPI/npm)은 호환을 위해 당분간 유지되나 deprecated 상태이며 더 이상 갱신되지 않습니다. `pip install amv-stt` / `npm install amv-stt`로 전환하십시오.
+>
+> Android **Termux 환경** 또는 **안드로이드 Linux 커널(루팅 없이 Linux 환경이 구동되는 모든 디바이스)** 에서 동작합니다 — Termux 전용이 아닙니다.
+
+[![PyPI](https://img.shields.io/pypi/v/amv-stt.svg?style=flat-square&color=0369a1)](https://pypi.org/project/amv-stt/)
+[![Python](https://img.shields.io/pypi/pyversions/amv-stt.svg?style=flat-square)](https://pypi.org/project/amv-stt/)
+[![npm](https://img.shields.io/npm/v/amv-stt.svg?style=flat-square&color=b91c1c)](https://www.npmjs.com/package/amv-stt)
+[![npm downloads](https://img.shields.io/npm/dm/amv-stt.svg?style=flat-square&color=b91c1c)](https://www.npmjs.com/package/amv-stt)
+[![License](https://img.shields.io/badge/License-Apache_2.0-004499.svg?style=flat-square)](https://github.com/uno-km/amv-stt)
 
 > **디바이스 리소스를 활용한 통합 온디바이스 음성인식(STT) 및 차세대 신경망 화자 분리(PyAnnote 3.0 + CAM++ 192d + TS-VAD) 프레임워크**  
 > *Unified On-Device Speech-to-Text & Neural Multi-Speaker Diarization (PyAnnote 3.0 + CAM++ 192d + TS-VAD Overlap Resolver)*
@@ -23,7 +27,7 @@ Integrates Whisper.cpp (Native Vulkan GPU / NEON CPU) and Sherpa-ONNX with PyAnn
 
 ### Python (PyPI)
 ```bash
-pip install termux-stt
+pip install amv-stt
 ```
 ```python
 from termux_stt import create_engine
@@ -33,8 +37,10 @@ engine = create_engine("whisper", model="small", lang="ko", threads=4, split_mod
 
 # 2. Transcribe Audio directly into Subtitles
 result = engine.transcribe("samples/jfk_1min.wav")
-print("Transcript:\n", result.text)
-print("SRT Subtitles:\n", result.to_srt())
+print("Transcript:
+", result.text)
+print("SRT Subtitles:
+", result.to_srt())
 
 # 3. Multi-Speaker Neural Diarization (PyAnnote 3.0 + CAM++ 192d + TS-VAD)
 hybrid = create_engine("hybrid", lang="ko", num_speakers=2)
@@ -46,10 +52,10 @@ for seg in diar_result.segments:
 
 ### Node.js / TypeScript (npm)
 ```bash
-npm install termux-stt
+npm install amv-stt
 ```
 ```typescript
-const { createEngine } = require("termux-stt");
+const { createEngine } = require("amv-stt");
 
 async function main() {
   // 1. Initialize Whisper Engine
@@ -58,7 +64,8 @@ async function main() {
   // 2. Transcribe Audio
   const result = await engine.transcribe("samples/jfk_1min.wav");
   console.log("Transcript:", result.text);
-  console.log("SRT Subtitles:\n", result.toSrt());
+  console.log("SRT Subtitles:
+", result.toSrt());
 
   // 3. Neural Diarization via Hybrid Engine
   const hybrid = createEngine("hybrid", { lang: "ko", numSpeakers: 2 });
